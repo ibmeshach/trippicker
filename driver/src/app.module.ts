@@ -9,6 +9,8 @@ import * as Joi from '@hapi/joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigDatabaseService } from './config/config.service';
 import { DataSource } from 'typeorm';
+import { DriverModule } from './driver/driver.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { DataSource } from 'typeorm';
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
-        GOOGLE_API_KEY: Joi.string().required(),
+        OTP_JWT_TOKEN: Joi.string().required(),
+        JWT_ACCESS_TOKEN: Joi.string().required(),
+        GOOGLE_MAPS_API_KEY: Joi.string().required(),
       }),
     }),
 
@@ -35,6 +39,8 @@ import { DataSource } from 'typeorm';
     AuthModule,
     RideModule,
     MapModule,
+    DriverModule,
+    SmsModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],

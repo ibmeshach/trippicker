@@ -8,7 +8,7 @@ import { LoginDto, ResendOtpDto, VerifyOtpDto } from './auth.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('/login')
+  @Post('login')
   @ApiResponse({
     status: 201,
     description: 'User logged in successfully',
@@ -22,7 +22,7 @@ export class AuthController {
     return await this.authService.login(body);
   }
 
-  @Post('/verify-otp')
+  @Post('verify-otp')
   @ApiResponse({
     status: 201,
     description: 'Otp verified successfully',
@@ -36,7 +36,7 @@ export class AuthController {
     return await this.authService.verifyOtp(body);
   }
 
-  @Post('/resend-otp')
+  @Post('resend-otp')
   @ApiResponse({
     status: 201,
     description: 'Otp sent successfully',

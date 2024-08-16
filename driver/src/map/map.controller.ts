@@ -7,7 +7,7 @@ import { CustomException } from 'src/custom.exception';
 export class MapController {
   constructor(private readonly mapService: MapService) {}
 
-  @MessagePattern('user.geocode')
+  @MessagePattern('driver.geocode')
   async geocode(@Payload() { data }: { data: GeoCodeProps }) {
     try {
       return await this.mapService.geocodeAddress(data.address);
@@ -24,7 +24,7 @@ export class MapController {
     }
   }
 
-  @MessagePattern('user.geocode')
+  @MessagePattern('driver.reverseGeocode')
   async reversegeocode(@Payload() { data }: { data: ReverseGeoCodeProps }) {
     try {
       return await this.mapService.reservegeocodeAddress(data);
@@ -41,7 +41,7 @@ export class MapController {
     }
   }
 
-  @MessagePattern('user.direction')
+  @MessagePattern('driver.direction')
   async direction(@Payload() { data }: { data: DirectionProps }) {
     try {
       return await this.mapService.getDirections(data.origin, data.destination);

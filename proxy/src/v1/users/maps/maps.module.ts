@@ -15,4 +15,4 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
   controllers: [MapsController],
   providers: [MapsService],
 })
-export class MapsModule {}
+export class UsersMapsModule {}

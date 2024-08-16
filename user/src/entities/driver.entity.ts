@@ -11,10 +11,10 @@ export class Driver extends BaseModel {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true })
   phoneNumber: string;
 
-  @Column({ nullable: true })
+  @Column()
   licenseNumber: string;
 
   @Column()
@@ -23,7 +23,7 @@ export class Driver extends BaseModel {
   @Column()
   vehiclePlateNumber: string;
 
-  @Column({ nullable: true })
+  @Column()
   vehicleColor: string;
 
   @Column({ type: 'float', nullable: true })
