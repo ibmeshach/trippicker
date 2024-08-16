@@ -10,25 +10,24 @@ import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import * as Joi from '@hapi/joi';
 import { User } from './entities/user.entity';
-import { ProtectionMiddleware } from './middleware/Protection.middleware';
 import { SmsModule } from './sms/sms.module';
+import { RideModule } from './ride/ride.module';
+import { MapModule } from './map/map.module';
+import { Ride } from './entities/rides.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
-        API_KEY: Joi.string().required(),
-        USER_X_API_KEY: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
         POSTGRES_HOST: Joi.string().required(),
         POSTGRES_PORT: Joi.number().required(),
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
-        TWILIO_ACCOUNT_SID: Joi.string().required(),
-        TWILIO_AUTH_TOKEN: Joi.string().required(),
         OTP_JWT_TOKEN: Joi.string().required(),
+        GOOGLE_API_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -39,9 +38,12 @@ import { SmsModule } from './sms/sms.module';
       },
     }),
 
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Ride]),
     AuthModule,
+    RideModule,
     SmsModule,
+    RideModule,
+    MapModule,
   ],
 
   controllers: [AppController],
@@ -53,9 +55,7 @@ export class AppModule implements NestModule {
     private logger: Logger,
   ) {}
 
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ProtectionMiddleware).forRoutes('*');
-  }
+  configure(consumer: MiddlewareConsumer) {}
 
   async onModuleInit() {
     if (!this.dataSource.isInitialized) {
