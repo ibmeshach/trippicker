@@ -11,7 +11,7 @@ import { LoginDto, ResendOtpDto, SignUpDto, VerifyOtpDto } from './auth.dto';
 import { CustomException } from 'src/custom.exception';
 
 @ApiTags('authentication')
-@Controller('v1/auth')
+@Controller('v1/users/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

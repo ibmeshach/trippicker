@@ -12,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { MapsModule } from './v1/users/maps/maps.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     }),
 
     AuthModule,
+    MapsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
