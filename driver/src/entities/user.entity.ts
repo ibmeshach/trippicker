@@ -35,6 +35,6 @@ export class User extends BaseModel {
   @OneToMany(() => Ride, (ride) => ride.user)
   rides: Ride[];
 
-  @OneToMany(() => Driver, (driver) => driver.user)
-  drivers: Driver[];
+  @ManyToOne(() => Driver, (driver) => driver.users)
+  driver: Driver;
 }
