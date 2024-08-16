@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { User } from './user.entity';
@@ -11,10 +11,10 @@ export class Driver extends BaseModel {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true })
   phoneNumber: string;
 
-  @Column({ nullable: true })
+  @Column()
   licenseNumber: string;
 
   @Column()
@@ -23,7 +23,7 @@ export class Driver extends BaseModel {
   @Column()
   vehiclePlateNumber: string;
 
-  @Column({ nullable: true })
+  @Column()
   vehicleColor: string;
 
   @Column({ type: 'float', nullable: true })
@@ -46,6 +46,12 @@ export class Driver extends BaseModel {
 
   @Column({ default: 0 })
   totalEarnings: number;
+
+  @Column({ nullable: true })
+  otpToken?: string;
+
+  @Column({ default: false })
+  isPhoneNumberConfirmed: boolean;
 
   @OneToMany(() => Ride, (ride) => ride.driver)
   rides: Ride[];
