@@ -1,17 +1,10 @@
-import {
-  Body,
-  Controller,
-  HttpException,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, ResendOtpDto, SignUpDto, VerifyOtpDto } from './auth.dto';
-import { CustomException } from 'src/custom.exception';
+import { LoginDto, ResendOtpDto, VerifyOtpDto } from './auth.dto';
 
-@ApiTags('user-authentication')
-@Controller('v1/users/auth')
+@ApiTags('driver-authentication')
+@Controller('v1/drivers/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -27,20 +20,6 @@ export class AuthController {
   })
   async login(@Body() body: LoginDto): Promise<any> {
     return await this.authService.login(body);
-  }
-
-  @Post('/signup')
-  @ApiResponse({
-    status: 201,
-    description: 'User created successfully',
-  })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })
-  @ApiBody({
-    type: SignUpDto,
-    description: 'Json structure for registering users',
-  })
-  async register(@Body() body: SignUpDto): Promise<any> {
-    return await this.authService.signup(body);
   }
 
   @Post('/verify-otp')
