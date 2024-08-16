@@ -48,10 +48,11 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthenticationMiddleware)
       .exclude(
-        { path: 'v1/auth/login', method: RequestMethod.POST },
-        { path: 'v1/auth/signup', method: RequestMethod.POST },
-        { path: 'v1/auth/verify-otp', method: RequestMethod.POST },
-        { path: 'v1/auth/resend-otp', method: RequestMethod.POST },
+        { path: 'v1/users/auth/login', method: RequestMethod.POST },
+        { path: 'v1/users/auth/signup', method: RequestMethod.POST },
+        { path: 'v1/users/auth/verify-otp', method: RequestMethod.POST },
+        { path: 'v1/users/auth/resend-otp', method: RequestMethod.POST },
+        { path: 'v1/users/maps/reverse-geocode', method: RequestMethod.GET },
       )
       .forRoutes('v1/*');
   }

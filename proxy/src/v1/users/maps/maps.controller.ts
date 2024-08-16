@@ -7,7 +7,7 @@ import { MapsService } from './maps.service';
 export class MapsController {
   constructor(private mapService: MapsService) {}
 
-  @Get('/geocode')
+  @Get('geocode')
   @ApiOperation({ summary: 'Get geocode for an address' })
   @ApiResponse({
     status: 200,
@@ -18,7 +18,7 @@ export class MapsController {
     return await this.mapService.geocode({ address });
   }
 
-  @Get('/reverse-geocode')
+  @Get('reverse-geocode')
   @ApiOperation({ summary: 'Get address from latitude and longitude' })
   @ApiResponse({
     status: 200,
@@ -32,7 +32,7 @@ export class MapsController {
     return await this.mapService.reverseGeocode({ lat, lng });
   }
 
-  @Get('/directions')
+  @Get('directions')
   @ApiOperation({ summary: 'Get directions between two locations' })
   @ApiResponse({
     status: 200,
@@ -51,7 +51,7 @@ export class MapsController {
     });
   }
 
-  @Get('/calculate-distance')
+  @Get('calculate-distance')
   @ApiOperation({ summary: 'Calculate distance between multiple locations' })
   @ApiResponse({
     status: 200,

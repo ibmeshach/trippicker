@@ -7,7 +7,6 @@ import { DataSource } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigDatabaseService } from './config/config.service';
 import { UserService } from './user/user.service';
-import { UserModule } from './user/user.module';
 import * as Joi from '@hapi/joi';
 import { User } from './entities/user.entity';
 import { SmsModule } from './sms/sms.module';
@@ -27,7 +26,7 @@ import { Ride } from './entities/rides.entity';
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
         OTP_JWT_TOKEN: Joi.string().required(),
-        GOOGLE_API_KEY: Joi.string().required(),
+        GOOGLE_MAPS_API_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({

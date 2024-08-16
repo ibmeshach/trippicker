@@ -17,40 +17,48 @@ export class MapService {
   }
 
   async geocodeAddress(address: string) {
-    return this.googleMapsClient.geocode({
+    const data = await this.googleMapsClient.geocode({
       params: {
         ...this.getSharedParams(),
         address,
       },
     });
+
+    return data.data;
   }
 
   async reservegeocodeAddress(latlng: LatLng) {
-    return this.googleMapsClient.reverseGeocode({
+    const data = await this.googleMapsClient.reverseGeocode({
       params: {
         ...this.getSharedParams(),
         latlng,
       },
     });
+
+    return data.data;
   }
 
   async getDirections(origin: LatLng, destination: LatLng) {
-    return this.googleMapsClient.directions({
+    const data = await this.googleMapsClient.directions({
       params: {
         ...this.getSharedParams(),
         origin,
         destination,
       },
     });
+
+    return data.data;
   }
 
   async calculateDistance(origin: LatLng[], destination: LatLng[]) {
-    return this.googleMapsClient.distancematrix({
+    const data = await this.googleMapsClient.distancematrix({
       params: {
         ...this.getSharedParams(),
         origins: origin,
         destinations: destination,
       },
     });
+
+    return data.data;
   }
 }

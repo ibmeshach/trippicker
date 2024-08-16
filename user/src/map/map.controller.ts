@@ -23,7 +23,7 @@ export class MapController {
     }
   }
 
-  @MessagePattern('user.geocode')
+  @MessagePattern('user.reverseGeocode')
   async reversegeocode(@Payload() { data }: { data: ReverseGeoCodeProps }) {
     try {
       return await this.mapService.reservegeocodeAddress(data);
