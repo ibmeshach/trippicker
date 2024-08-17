@@ -14,6 +14,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 export class AuthController {
   constructor(private authService: AuthService) {}
   @MessagePattern('user.signup')
+  @UseInterceptors(ClassSerializerInterceptor)
   async signup(@Payload() { data }: { data: SignupProps }) {
     try {
       return await this.authService.registerUser(data);
@@ -21,7 +22,6 @@ export class AuthController {
       if (err instanceof CustomException) {
         throw err;
       } else {
-        console.log('error', err);
         throw new HttpException(
           'Internal Server Error',
           HttpStatus.INTERNAL_SERVER_ERROR,

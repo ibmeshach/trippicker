@@ -41,7 +41,9 @@ export class AuthService {
       const token = await this.encodeOptCodeInToken(createdUser.id, otpCode);
 
       createdUser.otpToken = token;
-      const userResponse = await this.queryRunner.manager.save(createdUser);
+      const newUser = await this.queryRunner.manager.save(createdUser);
+
+      const userResponse = new UserEntity(newUser);
 
       await this.queryRunner.commitTransaction();
       return { user: userResponse, otpCode };
@@ -73,7 +75,7 @@ export class AuthService {
       const otpCode = this.smsService.generateOTP(4);
       const token = await this.encodeOptCodeInToken(user.id, otpCode);
 
-      const updatedUser = await this.userService.update({
+      const updatedUser = await this.userService.updateOtpToken({
         phoneNumber: body.phoneNumber,
         otpToken: token,
       });
@@ -96,15 +98,15 @@ export class AuthService {
       );
 
     const otp_secret = this.configService.get('OTP_JWT_TOKEN');
-    const payloadCode = await this.verifyjwtToken(user.otpToken, otp_secret);
+    const payload = await this.decodejwtToken(user.otpToken, otp_secret);
 
-    if (!payloadCode)
+    if (!payload)
       throw new CustomException(
         'Invalid or expired otp code',
         HttpStatus.BAD_REQUEST,
       );
 
-    if (!(body.otpCode == payloadCode))
+    if (!(body.otpCode == payload.otpCode))
       throw new CustomException(
         'Wrong otp code provided',
         HttpStatus.BAD_REQUEST,
@@ -135,7 +137,7 @@ export class AuthService {
     const otpCode = this.smsService.generateOTP(4);
     const token = await this.encodeOptCodeInToken(user.id, otpCode);
 
-    const updatedUser = await this.userService.update({
+    const updatedUser = await this.userService.updateOtpToken({
       phoneNumber: body.phoneNumber,
       otpToken: token,
     });
@@ -160,13 +162,13 @@ export class AuthService {
     return token;
   }
 
-  async verifyjwtToken(token: string, secret: string) {
+  async decodejwtToken(token: string, secret: string) {
     try {
       if (token) {
         const payload = await this.jwtService.verifyAsync(token, {
           secret,
         });
-        return payload.otpCode;
+        return payload;
       } else {
         return null;
       }

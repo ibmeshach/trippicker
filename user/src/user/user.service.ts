@@ -49,7 +49,7 @@ export class UserService {
     return user;
   }
 
-  async update(updateOptions: {
+  async updateOtpToken(updateOptions: {
     phoneNumber: string;
     otpToken: string;
   }): Promise<User> {
@@ -64,5 +64,21 @@ export class UserService {
     user.otpToken = otpToken;
     await this.usersRepository.save(user);
     return user;
+  }
+
+  async update(userId: string, updateOptions: updateUserOptions) {
+    return this.usersRepository.update(
+      {
+        id: userId,
+      },
+      updateOptions,
+    );
+  }
+
+  async updateUserLocation(
+    userId: string,
+    storeOptions: updateLocationOptions,
+  ) {
+    return await this.update(userId, storeOptions);
   }
 }
