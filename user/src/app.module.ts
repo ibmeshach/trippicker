@@ -13,6 +13,7 @@ import { SmsModule } from './sms/sms.module';
 import { RideModule } from './ride/ride.module';
 import { MapModule } from './map/map.module';
 import { Ride } from './entities/rides.entity';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { Ride } from './entities/rides.entity';
     SmsModule,
     RideModule,
     MapModule,
+    UserModule,
   ],
 
   controllers: [AppController],

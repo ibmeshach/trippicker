@@ -15,6 +15,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UsersMapsModule } from './v1/users/maps/maps.module';
 import { DriversMapsModule } from './v1/drivers/maps/maps.module';
+import { UsersGatewayModule } from './v1/users/gateway/gateway.module';
+import { DriversGatewayModule } from './v1/drivers/gateway/gateway.module';
 
 @Module({
   imports: [
@@ -50,6 +52,8 @@ import { DriversMapsModule } from './v1/drivers/maps/maps.module';
     DriversMapsModule,
     UsersAuthModule,
     UsersMapsModule,
+    UsersGatewayModule,
+    DriversGatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -59,11 +63,13 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthenticationMiddleware)
       .exclude(
-        { path: 'v1/drivers/auth/login', method: RequestMethod.POST },
+        { path: 'v1/users/auth/login', method: RequestMethod.POST },
         { path: 'v1/users/auth/signup', method: RequestMethod.POST },
         { path: 'v1/users/auth/verify-otp', method: RequestMethod.POST },
         { path: 'v1/users/auth/resend-otp', method: RequestMethod.POST },
-        { path: 'v1/drivers/maps/reverse-geocode', method: RequestMethod.GET },
+        { path: 'v1/drivers/auth/login', method: RequestMethod.POST },
+        { path: 'v1/drivers/auth/verify-otp', method: RequestMethod.POST },
+        { path: 'v1/drivers/auth/resend-otp', method: RequestMethod.POST },
       )
       .forRoutes('v1/*');
   }

@@ -21,7 +21,9 @@ export class UserController {
 
   @MessagePattern('user.updateLocation')
   @UseInterceptors(ClassSerializerInterceptor)
-  async login(@Payload() { data }: { data: LocationEventPayloadProps }) {
+  async updateLocation(
+    @Payload() { data }: { data: LocationEventPayloadProps },
+  ) {
     try {
       const secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
       const payload = await this.authService.decodejwtToken(data.token, secret);
@@ -44,6 +46,7 @@ export class UserController {
         userId,
         userCurrentLocationData,
       );
+      console.log(userCurrentLocationData);
 
       return userCurrentLocationData;
     } catch (err) {

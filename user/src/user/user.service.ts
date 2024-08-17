@@ -66,8 +66,8 @@ export class UserService {
     return user;
   }
 
-  async update(userId: string, updateOptions: updateUserOptions) {
-    return this.usersRepository.update(
+  async update(userId: string, updateOptions: Partial<User>) {
+    return await this.usersRepository.update(
       {
         id: userId,
       },
