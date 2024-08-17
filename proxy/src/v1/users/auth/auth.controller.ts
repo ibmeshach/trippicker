@@ -15,7 +15,7 @@ import { CustomException } from 'src/custom.exception';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('/login')
+  @Post('login')
   @ApiResponse({
     status: 201,
     description: 'User logged in successfully',
@@ -29,7 +29,7 @@ export class AuthController {
     return await this.authService.login(body);
   }
 
-  @Post('/signup')
+  @Post('signup')
   @ApiResponse({
     status: 201,
     description: 'User created successfully',
@@ -43,7 +43,7 @@ export class AuthController {
     return await this.authService.signup(body);
   }
 
-  @Post('/verify-otp')
+  @Post('verify-otp')
   @ApiResponse({
     status: 201,
     description: 'Otp verified successfully',
@@ -57,7 +57,7 @@ export class AuthController {
     return await this.authService.verifyOtp(body);
   }
 
-  @Post('/resend-otp')
+  @Post('resend-otp')
   @ApiResponse({
     status: 201,
     description: 'Otp sent successfully',

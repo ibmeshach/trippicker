@@ -22,10 +22,18 @@ import { DriversMapsModule } from './v1/drivers/maps/maps.module';
       {
         name: 'USERS',
         transport: Transport.TCP,
+        options: {
+          host: 'users-nestjs-backend.railway.internal',
+          port: 3001,
+        },
       },
       {
         name: 'DRIVERS',
         transport: Transport.TCP,
+        options: {
+          host: 'drivers-nestjs-backend.railway.internal',
+          port: 3002,
+        },
       },
     ]),
     JwtModule.register({
@@ -40,7 +48,7 @@ import { DriversMapsModule } from './v1/drivers/maps/maps.module';
 
     DriversAuthModule,
     DriversMapsModule,
-    UsersMapsModule,
+    UsersAuthModule,
     UsersMapsModule,
   ],
   controllers: [AppController],
