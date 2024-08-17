@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket Client</title>
+  </head>
+  <body>
+    <h1>WebSocket Client</h1>
+    <p>Open the browser's console to see WebSocket interactions.</p>
+
+    <script>
+      // Define the WebSocket server URL
+      const socketUrl = 'ws://localhost:5000'; // Change to your WebSocket server URL
+
+      // Create a new WebSocket instance
+      const socket = new WebSocket(socketUrl);
+
+      // Event handler for when the WebSocket connection is opened
+      socket.onopen = function (event) {
+        console.log('WebSocket connection established');
+
+        // Send a message to the server when the connection is open
+        const message = {
+          event: 'message',
+          data: 'Hello from the WebSocket client!',
+        };
+
+        // Send the message as a JSON string
+        socket.send(JSON.stringify(message));
+        console.log('Message sent:', message);
+      };
+
+      // Event handler for when a message is received from the server
+      socket.onmessage = function (event) {
+        const receivedData = JSON.parse(event.data);
+        console.log('Message received from server:', receivedData);
+      };
+
+      // Event handler for when the WebSocket connection is closed
+      socket.onclose = function (event) {
+        if (event.wasClean) {
+          console.log(
+            `WebSocket connection closed cleanly, code=${event.code}, reason=${event.reason}`,
+          );
+        } else {
+          console.log('WebSocket connection closed unexpectedly');
+        }
+      };
+
+      // Event handler for when there is an error with the WebSocket connection
+      socket.onerror = function (error) {
+        console.error('WebSocket error occurred:', error);
+      };
+    </script>
+  </body>
+</html>

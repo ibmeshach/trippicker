@@ -4,6 +4,11 @@ interface updateLocationOptions {
   currentLongitude: number;
 }
 
+interface findDriversOptions {
+  isAvailable?: boolean;
+  isOnline?: boolean;
+}
+
 interface updateUserOptions {
   phoneNumber?: string;
   address?: string;
@@ -16,7 +21,7 @@ interface LocationEventPayloadProps extends updateLocationOptions {
 }
 
 interface getNearestDriverProps {
-  maxDistance?: number;
+  maxDistance: number;
   userLatitude: number;
   userLongitude: number;
 }

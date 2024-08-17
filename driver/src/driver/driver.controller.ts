@@ -1,28 +1,25 @@
 import {
   ClassSerializerInterceptor,
   Controller,
-  Get,
   HttpException,
   HttpStatus,
-  Post,
-  Query,
   UseInterceptors,
 } from '@nestjs/common';
+import { DriverService } from './driver.service';
+import { AuthService } from 'src/auth/auth.service';
+import { ConfigService } from '@nestjs/config';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
-import { UserService } from './user.service';
-import { AuthService } from 'src/auth/services/auth.service';
-import { ConfigService } from '@nestjs/config';
 
-@Controller('user')
-export class UserController {
+@Controller('driver')
+export class DriverController {
   constructor(
-    private readonly userService: UserService,
+    private readonly driverService: DriverService,
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
 
-  @MessagePattern('user.updateLocation')
+  @MessagePattern('driver.updateLocation')
   @UseInterceptors(ClassSerializerInterceptor)
   async updateLocation(
     @Payload() { data }: { data: LocationEventPayloadProps },
@@ -37,20 +34,20 @@ export class UserController {
           HttpStatus.BAD_REQUEST,
         );
 
-      const userId = payload.sub;
+      const driverId = payload.sub;
 
-      const userCurrentLocationData = {
+      const driverCurrentLocationData = {
         address: data.address,
         currentLatitude: data.currentLatitude,
         currentLongitude: data.currentLongitude,
       };
 
-      await this.userService.updateUserLocation(
-        userId,
-        userCurrentLocationData,
+      await this.driverService.updateDriverLocation(
+        driverId,
+        driverCurrentLocationData,
       );
 
-      return userCurrentLocationData;
+      return driverCurrentLocationData;
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;
@@ -63,10 +60,18 @@ export class UserController {
     }
   }
 
-  @Get('nearest-drivers')
-  async getNearestDrivers(@Query() queries: getNearestDriverProps) {
+  @MessagePattern('driver.getNearestDrivers')
+  async getNearestDrivers(
+    @Payload() { data }: { data: getNearestDriverProps },
+  ) {
     try {
-      return await this.userService.getNearestDrivers(queries);
+      const drivers = await this.driverService.findNearestDrivers(
+        data.userLatitude,
+        data.userLongitude,
+        data.maxDistance,
+      );
+
+      return drivers;
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;

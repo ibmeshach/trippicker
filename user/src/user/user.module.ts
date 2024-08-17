@@ -5,9 +5,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { AuthService } from 'src/auth/services/auth.service';
 import { SmsService } from 'src/sms/sms.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    ClientsModule.register([
+      {
+        name: 'DRIVERS',
+        transport: Transport.TCP,
+        // options: {
+        //   host: 'users-nestjs-backend.railway.internal',
+        //   port: 3001,
+        // },
+      },
+    ]),
+  ],
   providers: [UserService, AuthService, SmsService],
   exports: [UserService],
   controllers: [UserController],

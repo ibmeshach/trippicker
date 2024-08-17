@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, Index } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { User } from './user.entity';
@@ -12,6 +12,7 @@ export class Driver extends BaseModel {
   email: string;
 
   @Column({ unique: true })
+  @Index()
   phoneNumber: string;
 
   @Column()
@@ -33,9 +34,11 @@ export class Driver extends BaseModel {
   currentLongitude: number;
 
   @Column({ default: true })
+  @Index()
   isAvailable: boolean;
 
   @Column({ default: false })
+  @Index()
   isOnline: boolean;
 
   @Column({ nullable: true })

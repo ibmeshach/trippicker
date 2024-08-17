@@ -1,14 +1,18 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomException } from 'src/custom.exception';
 import { User } from 'src/entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
+import { GetNearestDriversEvent } from './user.events';
+import { catchError } from 'rxjs';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @Inject('DRIVERS') private readonly driversClient: ClientProxy,
   ) {}
 
   async findUserByPhoneNumberLock(
@@ -80,5 +84,17 @@ export class UserService {
     storeOptions: updateLocationOptions,
   ) {
     return await this.update(userId, storeOptions);
+  }
+
+  async getNearestDrivers(data: getNearestDriverProps) {
+    const drivers = this.driversClient
+      .send('driver.getNearestDrivers', new GetNearestDriversEvent(data))
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+
+    return drivers;
   }
 }

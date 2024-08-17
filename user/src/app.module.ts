@@ -14,6 +14,7 @@ import { RideModule } from './ride/ride.module';
 import { MapModule } from './map/map.module';
 import { Ride } from './entities/rides.entity';
 import { UserModule } from './user/user.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -37,6 +38,17 @@ import { UserModule } from './user/user.module';
         return configDatabaseService.getTypeOrmConfig();
       },
     }),
+
+    ClientsModule.register([
+      {
+        name: 'DRIVERS',
+        transport: Transport.TCP,
+        // options: {
+        //   host: 'users-nestjs-backend.railway.internal',
+        //   port: 3001,
+        // },
+      },
+    ]),
 
     TypeOrmModule.forFeature([User, Ride]),
     AuthModule,
