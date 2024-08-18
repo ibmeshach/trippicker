@@ -97,7 +97,7 @@ export class DriverService {
   async findNearestDrivers(
     userLatitude: number,
     userLongitude: number,
-    maxDistance: number = 10000,
+    maxDistance: number = 2000000,
   ): Promise<Driver[]> {
     // const cacheKey = `nearest-drivers:${userLatitude}:${userLongitude}:${maxDistance}`;
     // const cachedResult = await this.redis.get(cacheKey);
@@ -106,31 +106,30 @@ export class DriverService {
     // }
 
     // Get all drivers (you might want to limit this query for performance reasons)
-    const drivers = await this.findDriverByOptions({
-      isAvailable: true,
-      isOnline: true,
-    });
 
-    console.log('all drivers', drivers);
+    const nearestDrivers = await this.driverRepository
+      .createQueryBuilder('driver')
+      .where('driver.isAvailable = :isAvailable', { isAvailable: true })
+      .andWhere('driver.isOnline = :isOnline', { isOnline: true })
+      .andWhere(
+        `(
+        6371 * acos(
+          cos(radians(:latitude)) * cos(radians(driver.currentLatitude))
+          * cos(radians(driver.currentLongitude) - radians(:longitude))
+          + sin(radians(:latitude)) * sin(radians(driver.currentLatitude))
+        )
+      ) <= :maxDistance`,
+        {
+          latitude: userLatitude,
+          longitude: userLongitude,
+          maxDistance: maxDistance / 1000,
+        }, // Convert maxDistance to kilometers
+      )
+      .limit(20) // Limit results for performance
+      .getMany();
 
-    // Filter drivers by calculating the distance between the user and driver
-    const nearestDrivers = drivers.filter((driver) => {
-      if (driver.currentLatitude && driver.currentLongitude) {
-        const distance = this.getHaversineDistance(
-          { latitude: userLatitude, longitude: userLongitude },
-          {
-            latitude: driver.currentLatitude,
-            longitude: driver.currentLongitude,
-          },
-        );
-
-        console.log('distance', distance);
-        return distance <= maxDistance;
-      }
-    });
-
-    // await this.redis.set(cacheKey, JSON.stringify(drivers), 'EX', 3600); // Cache for 1 hour
     return nearestDrivers;
+    // await this.redis.set(cacheKey, JSON.stringify(drivers), 'EX', 3600); // Cache for 1 hour
   }
 
   getHaversineDistance(

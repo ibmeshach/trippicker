@@ -13,10 +13,9 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { UsersMapsModule } from './v1/users/maps/maps.module';
-import { DriversMapsModule } from './v1/drivers/maps/maps.module';
 import { UsersGatewayModule } from './v1/users/gateway/gateway.module';
 import { DriversGatewayModule } from './v1/drivers/gateway/gateway.module';
+import { MapsModule } from './v1/maps/maps.module';
 
 @Module({
   imports: [
@@ -33,7 +32,7 @@ import { DriversGatewayModule } from './v1/drivers/gateway/gateway.module';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
@@ -44,14 +43,14 @@ import { DriversGatewayModule } from './v1/drivers/gateway/gateway.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
+        GOOGLE_MAPS_API_KEY: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
       }),
     }),
 
+    MapsModule,
     DriversAuthModule,
-    DriversMapsModule,
     UsersAuthModule,
-    UsersMapsModule,
     UsersGatewayModule,
     DriversGatewayModule,
   ],

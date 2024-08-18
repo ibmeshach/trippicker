@@ -65,11 +65,14 @@ export class DriverController {
     @Payload() { data }: { data: getNearestDriverProps },
   ) {
     try {
+      console.log(data);
       const drivers = await this.driverService.findNearestDrivers(
         data.userLatitude,
         data.userLongitude,
         data.maxDistance,
       );
+
+      console.log(drivers);
 
       return drivers;
     } catch (err) {

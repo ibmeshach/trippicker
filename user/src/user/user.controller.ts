@@ -13,6 +13,7 @@ import { CustomException } from 'src/custom.exception';
 import { UserService } from './user.service';
 import { AuthService } from 'src/auth/services/auth.service';
 import { ConfigService } from '@nestjs/config';
+import { Driver } from 'src/entities/driver.entity';
 
 @Controller('user')
 export class UserController {
@@ -50,23 +51,12 @@ export class UserController {
         userCurrentLocationData,
       );
 
-      return userCurrentLocationData;
-    } catch (err) {
-      if (err instanceof CustomException) {
-        throw err;
-      } else {
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
-  }
+      // const drivers = await this.userService.getNearestDrivers({
+      //   userLatitude: data.currentLatitude,
+      //   userLongitude: data.currentLongitude,
+      // });
 
-  @Get('nearest-drivers')
-  async getNearestDrivers(@Query() queries: getNearestDriverProps) {
-    try {
-      return await this.userService.getNearestDrivers(queries);
+      return userCurrentLocationData;
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;

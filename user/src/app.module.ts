@@ -11,7 +11,6 @@ import * as Joi from '@hapi/joi';
 import { User } from './entities/user.entity';
 import { SmsModule } from './sms/sms.module';
 import { RideModule } from './ride/ride.module';
-import { MapModule } from './map/map.module';
 import { Ride } from './entities/rides.entity';
 import { UserModule } from './user/user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -28,7 +27,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
         OTP_JWT_TOKEN: Joi.string().required(),
-        GOOGLE_MAPS_API_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -43,10 +41,10 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       {
         name: 'DRIVERS',
         transport: Transport.TCP,
-        // options: {
-        //   host: 'users-nestjs-backend.railway.internal',
-        //   port: 3001,
-        // },
+        options: {
+          // host: 'users-nestjs-backend.railway.internal',
+          port: 3002,
+        },
       },
     ]),
 
@@ -55,7 +53,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     RideModule,
     SmsModule,
     RideModule,
-    MapModule,
     UserModule,
   ],
 

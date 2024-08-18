@@ -5,7 +5,7 @@ import { CustomException } from 'src/custom.exception';
 import { User } from 'src/entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetNearestDriversEvent } from './user.events';
-import { catchError } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -87,14 +87,20 @@ export class UserService {
   }
 
   async getNearestDrivers(data: getNearestDriverProps) {
-    const drivers = this.driversClient
-      .send('driver.getNearestDrivers', new GetNearestDriversEvent(data))
-      .pipe(
-        catchError((error) => {
-          throw error;
-        }),
-      );
+    try {
+      const driversObservable = this.driversClient
+        .send('driver.getNearestDrivers', new GetNearestDriversEvent(data))
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
 
-    return drivers;
+      const drivers = await firstValueFrom(driversObservable);
+      return drivers;
+    } catch (error) {
+      // Handle the error here
+      throw error;
+    }
   }
 }

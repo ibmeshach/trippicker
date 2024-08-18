@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { RideModule } from './ride/ride.module';
-import { MapModule } from './map/map.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -24,7 +23,6 @@ import { SmsModule } from './sms/sms.module';
         POSTGRES_DATABASE: Joi.string().required(),
         OTP_JWT_TOKEN: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
-        GOOGLE_MAPS_API_KEY: Joi.string().required(),
       }),
     }),
 
@@ -38,7 +36,6 @@ import { SmsModule } from './sms/sms.module';
 
     AuthModule,
     RideModule,
-    MapModule,
     DriverModule,
     SmsModule,
   ],

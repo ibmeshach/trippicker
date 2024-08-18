@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GatewayService } from './gateway.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { MapsService } from 'src/v1/maps/maps.service';
 
 @Module({
   imports: [
@@ -8,13 +9,21 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       {
         name: 'USERS',
         transport: Transport.TCP,
-        // options: {
-        //   host: 'users-nestjs-backend.railway.internal',
-        //   port: 3001,
-        // },
+        options: {
+          // host: 'users-nestjs-backend.railway.internal',
+          port: 3001,
+        },
+      },
+      {
+        name: 'DRIVERS',
+        transport: Transport.TCP,
+        options: {
+          // host: 'users-nestjs-backend.railway.internal',
+          port: 3002,
+        },
       },
     ]),
   ],
-  providers: [GatewayService],
+  providers: [GatewayService, MapsService],
 })
 export class UsersGatewayModule {}
