@@ -1,5 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { RedisConfigService } from 'src/config/redis.service';
 import { CustomException } from 'src/custom.exception';
 import { Driver } from 'src/entities/driver.entity';
 import { EntityManager, Repository } from 'typeorm';
@@ -9,6 +11,8 @@ export class DriverService {
   constructor(
     @InjectRepository(Driver)
     private driverRepository: Repository<Driver>,
+    private jwtService: JwtService,
+    private redisService: RedisConfigService,
   ) {}
 
   async findDriverByPhoneNumberLock(
@@ -99,37 +103,46 @@ export class DriverService {
     userLongitude: number,
     maxDistance: number = 2000000,
   ): Promise<Driver[]> {
-    // const cacheKey = `nearest-drivers:${userLatitude}:${userLongitude}:${maxDistance}`;
-    // const cachedResult = await this.redis.get(cacheKey);
-    // if (cachedResult) {
-    //   return JSON.parse(cachedResult);
-    // }
+    try {
+      const cacheKey = `nearest-drivers:${userLatitude}:${userLongitude}:${maxDistance}`;
+      const cachedResult = await this.redisService.get(cacheKey);
 
-    // Get all drivers (you might want to limit this query for performance reasons)
+      if (cachedResult) {
+        return JSON.parse(cachedResult);
+      }
 
-    const nearestDrivers = await this.driverRepository
-      .createQueryBuilder('driver')
-      .where('driver.isAvailable = :isAvailable', { isAvailable: true })
-      .andWhere('driver.isOnline = :isOnline', { isOnline: true })
-      .andWhere(
-        `(
+      // Get all drivers (you might want to limit this query for performance reasons)
+
+      const nearestDrivers = await this.driverRepository
+        .createQueryBuilder('driver')
+        .where('driver.isAvailable = :isAvailable', { isAvailable: true })
+        .andWhere('driver.isOnline = :isOnline', { isOnline: true })
+        .andWhere(
+          `(
         6371 * acos(
           cos(radians(:latitude)) * cos(radians(driver.currentLatitude))
           * cos(radians(driver.currentLongitude) - radians(:longitude))
           + sin(radians(:latitude)) * sin(radians(driver.currentLatitude))
         )
       ) <= :maxDistance`,
-        {
-          latitude: userLatitude,
-          longitude: userLongitude,
-          maxDistance: maxDistance / 1000,
-        }, // Convert maxDistance to kilometers
-      )
-      .limit(20) // Limit results for performance
-      .getMany();
+          {
+            latitude: userLatitude,
+            longitude: userLongitude,
+            maxDistance: maxDistance / 1000,
+          }, // Convert maxDistance to kilometers
+        )
+        .limit(20) // Limit results for performance
+        .getMany();
 
-    return nearestDrivers;
-    // await this.redis.set(cacheKey, JSON.stringify(drivers), 'EX', 3600); // Cache for 1 hour
+      await this.redisService.set(
+        cacheKey,
+        JSON.stringify(nearestDrivers),
+        3600,
+      ); // Cache for 1 hour
+      return nearestDrivers;
+    } catch (err) {
+      console.log('error in the driver service', err);
+    }
   }
 
   getHaversineDistance(
@@ -158,5 +171,20 @@ export class DriverService {
   // Convert degrees to radians
   degToRad(deg: number): number {
     return deg * (Math.PI / 180);
+  }
+
+  async decodejwtToken(token: string, secret: string) {
+    try {
+      if (token) {
+        const payload = await this.jwtService.verifyAsync(token, {
+          secret,
+        });
+        return payload;
+      } else {
+        return null;
+      }
+    } catch (err) {
+      return null;
+    }
   }
 }

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { Client, LatLngLiteral } from '@googlemaps/google-maps-services-js';
 import { ConfigService } from '@nestjs/config';
+import { CustomException } from 'src/custom.exception';
 
 @Injectable()
 export class MapsService {
@@ -65,11 +66,7 @@ export class MapsService {
     return data.data;
   }
 
-  async getRideDetails(
-    origin: LatLngLiteral,
-    destinations: LatLngLiteral[],
-    averageSpeedKmph: number = 50,
-  ) {
+  async getRideDetails(origin: LatLngLiteral, destinations: LatLngLiteral[]) {
     try {
       // Get the distance matrix data
       const data = await this.googleMapsClient.distancematrix({
@@ -82,8 +79,12 @@ export class MapsService {
 
       // Validate the response structure
       const elements = data.data.rows[0]?.elements[0];
-      if (!elements || !elements.distance || !elements.distance.value) {
-        throw new Error('Invalid response structure from Google Maps API.');
+
+      if (!elements || !elements.distance || !elements.duration) {
+        throw new CustomException(
+          'Invalid lat and lng origin and destination',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // Extract the distance in kilometers from the response
@@ -91,8 +92,11 @@ export class MapsService {
       const distanceInKilometers = distanceInMeters / 1000;
 
       // Calculate the duration using the average speed
-      const durationInHours = distanceInKilometers / averageSpeedKmph;
-      const durationInMinutes = durationInHours * 60;
+      // const durationInSeconds = elements.duration.value;
+      const durationInMinutes = elements.duration.value / 60;
+
+      // const durationInHours = distanceInKilometers / averageSpeedKmph;
+      // const durationInMinutes = durationInHours * 60;
 
       // Calculate the cost of the ride in Naira
       const baseFare = 1000; // Base fare in Naira (e.g., ₦1000)
@@ -107,10 +111,12 @@ export class MapsService {
       return {
         distance: {
           value: distanceInKilometers,
+          text: elements.distance.text,
           unit: 'km',
         },
         duration: {
           value: durationInMinutes,
+          text: elements.duration.text,
           unit: 'minutes',
         },
         cost: {
@@ -119,10 +125,7 @@ export class MapsService {
         },
       };
     } catch (error) {
-      console.error('Error calculating ride details:', error);
-      throw new Error(
-        'Could not calculate ride details. Please try again later.',
-      );
+      throw error;
     }
   }
 }

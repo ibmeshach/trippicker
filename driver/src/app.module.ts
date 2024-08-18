@@ -10,9 +10,14 @@ import { ConfigDatabaseService } from './config/config.service';
 import { DataSource } from 'typeorm';
 import { DriverModule } from './driver/driver.module';
 import { SmsModule } from './sms/sms.module';
+import { RedisConfigService } from './config/redis.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    JwtModule.register({
+      global: true,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
@@ -23,6 +28,8 @@ import { SmsModule } from './sms/sms.module';
         POSTGRES_DATABASE: Joi.string().required(),
         OTP_JWT_TOKEN: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
+        REDIS_URL: Joi.string().required(),
+        CACHE_TTL: Joi.number().required(),
       }),
     }),
 
@@ -33,7 +40,6 @@ import { SmsModule } from './sms/sms.module';
         return configDatabaseService.getTypeOrmConfig();
       },
     }),
-
     AuthModule,
     RideModule,
     DriverModule,

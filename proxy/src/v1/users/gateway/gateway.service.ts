@@ -47,18 +47,19 @@ export class GatewayService {
   }
 
   @SubscribeMessage('partialRideDetails')
-  async getPartialRideDetails(@MessageBody() data: string) {
-    const parsedData: PartialRideDetailsProps = JSON.parse(data);
-    console.log(parsedData);
+  async getPartialRideDetails(@MessageBody() data: PartialRideDetailsProps) {
+    // console.log('data', data);
+    // const parsedData: PartialRideDetailsProps = JSON.parse(data);
+    // console.log(parsedData);
 
     try {
       const driversObservable = this.driversClient
         .send(
           'driver.getNearestDrivers',
           new GetNearestDriversEvent({
-            maxDistance: parsedData.distance,
-            userLatitude: parsedData.origin.lat,
-            userLongitude: parsedData.origin.lng,
+            maxDistance: data.distance,
+            userLatitude: data.origin.lat,
+            userLongitude: data.origin.lng,
           }),
         )
         .pipe(
@@ -69,8 +70,8 @@ export class GatewayService {
 
       const drivers = await firstValueFrom(driversObservable);
       const rideDetails = await this.mapsService.getRideDetails(
-        parsedData.origin,
-        parsedData.destination,
+        data.origin,
+        data.destination,
       );
       return {
         drivers,
@@ -79,7 +80,6 @@ export class GatewayService {
         cost: rideDetails.cost,
       };
     } catch (error) {
-      console.error('Error fetching drivers:', error);
       throw error;
     }
   }

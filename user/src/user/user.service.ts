@@ -6,12 +6,14 @@ import { User } from 'src/entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { GetNearestDriversEvent } from './user.events';
 import { catchError, firstValueFrom } from 'rxjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private jwtService: JwtService,
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
   ) {}
 
@@ -101,6 +103,21 @@ export class UserService {
     } catch (error) {
       // Handle the error here
       throw error;
+    }
+  }
+
+  async decodejwtToken(token: string, secret: string) {
+    try {
+      if (token) {
+        const payload = await this.jwtService.verifyAsync(token, {
+          secret,
+        });
+        return payload;
+      } else {
+        return null;
+      }
+    } catch (err) {
+      return null;
     }
   }
 }

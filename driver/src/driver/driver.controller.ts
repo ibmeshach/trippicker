@@ -6,7 +6,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { DriverService } from './driver.service';
-import { AuthService } from 'src/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
@@ -15,7 +14,6 @@ import { CustomException } from 'src/custom.exception';
 export class DriverController {
   constructor(
     private readonly driverService: DriverService,
-    private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -26,7 +24,10 @@ export class DriverController {
   ) {
     try {
       const secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
-      const payload = await this.authService.decodejwtToken(data.token, secret);
+      const payload = await this.driverService.decodejwtToken(
+        data.token,
+        secret,
+      );
 
       if (!payload)
         throw new CustomException(
@@ -65,14 +66,11 @@ export class DriverController {
     @Payload() { data }: { data: getNearestDriverProps },
   ) {
     try {
-      console.log(data);
       const drivers = await this.driverService.findNearestDrivers(
         data.userLatitude,
         data.userLongitude,
         data.maxDistance,
       );
-
-      console.log(drivers);
 
       return drivers;
     } catch (err) {
