@@ -4,43 +4,43 @@ import { RedisClientType, createClient } from 'redis';
 
 @Injectable()
 export class RedisConfigService {
-  private readonly redisClient: RedisClientType;
+  private static redisClient: RedisClientType;
 
   constructor(private configService: ConfigService) {
-    const redisUrl = this.configService.get<string>('REDIS_URL');
+    if (!RedisConfigService.redisClient) {
+      const redisUrl = this.configService.get<string>('REDIS_URL');
 
-    this.redisClient = createClient({
-      url: redisUrl,
-    });
-
-    this.redisClient.on('ready', () => {
-      console.log('Redis connection established and ready to use!');
-    });
-
-    this.redisClient.on('error', (err) => {
-      console.error('Redis Client Error', err);
-    });
-
-    this.redisClient.connect();
-  }
-
-  getClient(): RedisClientType {
-    return this.redisClient;
-  }
-
-  // Example method to set a value in Redis
-  async set(key: string, value: any, expireInSeconds?: number): Promise<void> {
-    if (expireInSeconds) {
-      await this.redisClient.set(key, value, {
-        EX: expireInSeconds,
+      RedisConfigService.redisClient = createClient({
+        url: redisUrl,
       });
-    } else {
-      await this.redisClient.set(key, value);
+
+      RedisConfigService.redisClient.on('ready', () => {
+        console.log('Redis connection established and ready to use!');
+      });
+
+      RedisConfigService.redisClient.on('error', (err) => {
+        console.error('Redis Client Error', err);
+      });
+
+      RedisConfigService.redisClient.connect();
     }
   }
 
-  // Example method to get a value from Redis
+  getClient(): RedisClientType {
+    return RedisConfigService.redisClient;
+  }
+  // Example method to set a value in Redis
+  async set(key: string, value: any, expireInSeconds?: number): Promise<void> {
+    if (expireInSeconds) {
+      await RedisConfigService.redisClient.set(key, value, {
+        EX: expireInSeconds,
+      });
+    } else {
+      await RedisConfigService.redisClient.set(key, value);
+    }
+  }
+
   async get(key: string): Promise<string | null> {
-    return await this.redisClient.get(key);
+    return await RedisConfigService.redisClient.get(key);
   }
 }
