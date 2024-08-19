@@ -3,18 +3,22 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Inject,
   UseInterceptors,
 } from '@nestjs/common';
 import { DriverService } from './driver.service';
 import { ConfigService } from '@nestjs/config';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
+import { GetUserEvent } from './driver.events';
+import { catchError, firstValueFrom } from 'rxjs';
 
 @Controller('driver')
 export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
+    @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {}
 
   @MessagePattern('driver.updateLocation')
@@ -66,7 +70,7 @@ export class DriverController {
 
   @MessagePattern('driver.getNearestDrivers')
   async getNearestDrivers(
-    @Payload() { data }: { data: getNearestDriverProps },
+    @Payload() { data }: { data: GetNearestDriverProps },
   ) {
     try {
       const drivers = await this.driverService.findNearestDrivers(
@@ -77,6 +81,41 @@ export class DriverController {
 
       return drivers;
     } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.closestDriver')
+  async requestRide(@Payload() { data }: { data: GetClosestDriverProps }) {
+    try {
+      const driver = await this.driverService.findClosestDriver(
+        data.origin.lat,
+        data.origin.lng,
+      );
+
+      const userObservable = this.usersClient
+        .send('user.userDetails', new GetUserEvent(data.userId))
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      const user = await firstValueFrom(userObservable);
+
+      console.log(driver, 'driver');
+      console.log(user, 'user');
+
+      return { driver, user };
+    } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {

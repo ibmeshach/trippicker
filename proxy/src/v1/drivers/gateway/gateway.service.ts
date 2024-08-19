@@ -48,6 +48,6 @@ export class GatewayService {
   }
 
   requestRide(payload: RequestRideProps): void {
-    this.server.emit(`rideRequest/${payload.driver.id}`, payload);
+    this.server.emit(`rideRequest:${payload.driver.id}`, payload);
   }
 }

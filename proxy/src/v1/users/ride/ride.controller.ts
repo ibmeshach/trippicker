@@ -1,10 +1,11 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
 import { RideService } from './ride.service';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RequestRideDto } from './ride.dto';
 import { Request } from 'express';
 
-@Controller('ride')
+@ApiTags('ride')
+@Controller('v1/users/ride')
 export class RideController {
   constructor(private readonly rideService: RideService) {}
 

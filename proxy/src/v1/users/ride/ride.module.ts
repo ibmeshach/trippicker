@@ -29,4 +29,4 @@ import { MapsService } from 'src/v1/maps/maps.service';
   controllers: [RideController],
   providers: [RideService, GatewayService, MapsService],
 })
-export class UserRidesModule {}
+export class UserRideModule {}

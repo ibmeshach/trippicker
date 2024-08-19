@@ -1,3 +1,8 @@
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
 interface updateLocationOptions {
   address: string;
   currentLatitude: number;
@@ -20,8 +25,15 @@ interface LocationEventPayloadProps extends updateLocationOptions {
   token: string;
 }
 
-interface getNearestDriverProps {
+interface DriverProps {}
+
+interface GetNearestDriverProps {
   maxDistance: number;
   userLatitude: number;
   userLongitude: number;
+}
+
+interface GetClosestDriverProps {
+  userId: string;
+  origin: LatLng;
 }

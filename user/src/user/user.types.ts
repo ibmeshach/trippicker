@@ -15,6 +15,10 @@ interface LocationEventPayloadProps extends updateLocationOptions {
   token: string;
 }
 
+interface RequestRideProps {
+  token: string;
+}
+
 interface getNearestDriverProps {
   maxDistance?: number;
   userLatitude: number;

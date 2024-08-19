@@ -30,14 +30,6 @@ class LatLng {
 
 export class RequestRideDto {
   @IsNotEmpty()
-  @IsString()
-  @ApiProperty({
-    example: 'ride123',
-    description: 'Unique identifier for the ride request',
-  })
-  id: string;
-
-  @IsNotEmpty()
   @IsNumber()
   @IsPositive()
   @ApiProperty({
