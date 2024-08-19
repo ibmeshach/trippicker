@@ -29,7 +29,6 @@ import { JwtModule } from '@nestjs/jwt';
         OTP_JWT_TOKEN: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
         REDIS_URL: Joi.string().required(),
-        CACHE_TTL: Joi.number().required(),
       }),
     }),
 

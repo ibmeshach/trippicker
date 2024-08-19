@@ -21,6 +21,7 @@ export class AuthenticationMiddleware implements NestMiddleware {
         const payload = await this.jwtService.verifyAsync(token, {
           secret: this.configService.get('JWT_ACCESS_TOKEN'),
         });
+
         req['user'] = payload;
         next();
       } else {

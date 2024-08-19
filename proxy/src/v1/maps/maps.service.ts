@@ -68,7 +68,6 @@ export class MapsService {
 
   async getRideDetails(origin: LatLngLiteral, destinations: LatLngLiteral[]) {
     try {
-      // Get the distance matrix data
       const data = await this.googleMapsClient.distancematrix({
         params: {
           ...this.getSharedParams(),
@@ -87,26 +86,23 @@ export class MapsService {
         );
       }
 
-      // Extract the distance in kilometers from the response
+      console.log(elements, 'data');
+
       const distanceInMeters = elements.distance.value;
       const distanceInKilometers = distanceInMeters / 1000;
-
-      // Calculate the duration using the average speed
-      // const durationInSeconds = elements.duration.value;
       const durationInMinutes = elements.duration.value / 60;
 
-      // const durationInHours = distanceInKilometers / averageSpeedKmph;
-      // const durationInMinutes = durationInHours * 60;
+      // Calculate the cost
+      const randomMultiplier = Math.random() * (1.8 - 1.6) + 1.6;
+      let costValue = elements.duration.value * randomMultiplier;
 
-      // Calculate the cost of the ride in Naira
-      const baseFare = 1000; // Base fare in Naira (e.g., ₦1000)
-      const costPerKm = 200; // Cost per kilometer (e.g., ₦200 per km)
-      const costPerMinute = 50; // Cost per minute of travel time (e.g., ₦50 per minute)
+      // Round the cost to 2 significant figures
+      costValue =
+        Math.ceil(costValue / Math.pow(10, Math.floor(Math.log10(costValue)))) *
+        Math.pow(10, Math.floor(Math.log10(costValue)));
 
-      const totalCost =
-        baseFare +
-        costPerKm * distanceInKilometers +
-        costPerMinute * durationInMinutes;
+      // Ensure the minimum price is 1000
+      costValue = Math.max(costValue, 1000);
 
       return {
         distance: {
@@ -120,7 +116,7 @@ export class MapsService {
           unit: 'minutes',
         },
         cost: {
-          value: totalCost,
+          value: costValue,
           unit: '₦',
         },
       };

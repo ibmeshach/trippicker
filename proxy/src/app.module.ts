@@ -16,6 +16,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { UsersGatewayModule } from './v1/users/gateway/gateway.module';
 import { DriversGatewayModule } from './v1/drivers/gateway/gateway.module';
 import { MapsModule } from './v1/maps/maps.module';
+import { UserRidesModule } from './v1/users/ride/ride.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { MapsModule } from './v1/maps/maps.module';
     UsersAuthModule,
     UsersGatewayModule,
     DriversGatewayModule,
+    UserRidesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

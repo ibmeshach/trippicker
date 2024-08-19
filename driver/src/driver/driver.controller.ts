@@ -48,8 +48,11 @@ export class DriverController {
         driverCurrentLocationData,
       );
 
+      console.log(driverCurrentLocationData);
+
       return driverCurrentLocationData;
     } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {

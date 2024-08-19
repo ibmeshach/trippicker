@@ -22,21 +22,19 @@ export class GatewayService {
 
   @SubscribeMessage('updateLocation')
   async updateLocation(
-    @MessageBody() data: string,
+    @MessageBody() data: Partial<UpdateLocationsProps>,
     @ConnectedSocket() socket: Socket,
   ) {
     const token = socket.handshake.headers['authorization'];
-    const parsedData: UpdateLocationsProps = JSON.parse(data);
-    console.log(parsedData);
 
     return this.usersClient
       .send(
         'user.updateLocation',
         new UpdateLocationEvent({
           token,
-          address: parsedData.address,
-          currentLatitude: parsedData.currentLatitude,
-          currentLongitude: parsedData.currentLongitude,
+          address: data.address,
+          currentLatitude: data.currentLatitude,
+          currentLongitude: data.currentLongitude,
         }),
       )
       .pipe(

@@ -27,6 +27,9 @@ export class Driver extends BaseModel {
   @Column()
   vehicleColor: string;
 
+  @Column({ nullable: true })
+  address: string;
+
   @Column({ type: 'float', nullable: true })
   currentLatitude: number;
 
