@@ -15,9 +15,6 @@ export class Ride extends BaseModel {
   @Column({ default: 'requested' })
   status: string;
 
-  @CreateDateColumn()
-  startTime: Date;
-
   @Column({ nullable: true })
   endTime: Date;
 

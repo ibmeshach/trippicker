@@ -1,4 +1,5 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
@@ -11,9 +12,8 @@ import {
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { UserService } from './user.service';
-import { AuthService } from 'src/auth/services/auth.service';
 import { ConfigService } from '@nestjs/config';
-import { Driver } from 'src/entities/driver.entity';
+import { UserEntity } from './serializers/user.serializer';
 
 @Controller('user')
 export class UserController {
@@ -56,6 +56,30 @@ export class UserController {
       // });
 
       return userCurrentLocationData;
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.userDetails')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async getUserDetails(@Payload() { data }: { data: { id: string } }) {
+    try {
+      const user = await this.userService.findUserById(data.id);
+
+      if (!user)
+        throw new CustomException('User not found', HttpStatus.NOT_FOUND);
+
+      const responseUser = new UserEntity(user);
+
+      return { user: responseUser };
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;

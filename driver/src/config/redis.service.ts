@@ -1,4 +1,4 @@
-import { Injectable, LoggerService } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisClientType, createClient } from 'redis';
 
@@ -29,6 +29,7 @@ export class RedisConfigService {
   getClient(): RedisClientType {
     return RedisConfigService.redisClient;
   }
+
   // Example method to set a value in Redis
   async set(key: string, value: any, expireInSeconds?: number): Promise<void> {
     if (expireInSeconds) {
