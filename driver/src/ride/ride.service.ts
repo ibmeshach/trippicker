@@ -9,4 +9,9 @@ export class RideService {
     @InjectRepository(Ride)
     private rideRepository: Repository<Ride>,
   ) {}
+
+  create(createRideData: Partial<Ride>) {
+    const driver = this.rideRepository.create(createRideData);
+    return driver;
+  }
 }

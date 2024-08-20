@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GatewayService } from './gateway.service';
+import { UsersGatewayService } from './gateway.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MapsService } from 'src/v1/maps/maps.service';
 
@@ -24,6 +24,7 @@ import { MapsService } from 'src/v1/maps/maps.service';
       },
     ]),
   ],
-  providers: [GatewayService, MapsService],
+  providers: [UsersGatewayService, MapsService],
+  exports: [UsersGatewayService],
 })
 export class UsersGatewayModule {}

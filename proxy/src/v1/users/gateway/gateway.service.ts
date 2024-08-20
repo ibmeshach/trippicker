@@ -4,6 +4,7 @@ import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { ClientProxy } from '@nestjs/microservices';
 import { Server, Socket } from 'socket.io';
@@ -12,13 +13,15 @@ import { GetNearestDriversEvent, UpdateLocationEvent } from './gateway.events';
 import { MapsService } from 'src/v1/maps/maps.service';
 
 @WebSocketGateway({ namespace: 'v1/users' })
-export class GatewayService {
+export class UsersGatewayService {
   configService: any;
   constructor(
     @Inject('USERS') private readonly usersClient: ClientProxy,
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
     private readonly mapsService: MapsService,
   ) {}
+
+  @WebSocketServer() server: Server;
 
   @SubscribeMessage('updateLocation')
   async updateLocation(
@@ -44,9 +47,9 @@ export class GatewayService {
       );
   }
 
-  // requestRideResponse(payload: RequestRideGatewayProps): void {
-  //   this.server.emit(`rideRequestResponse:${payload.driver.id}`, payload);
-  // }
+  requestRideResponse(payload: RequestRideGatewayProps): void {
+    this.server.emit(`rideRequestResponse:${payload.user.id}`, payload);
+  }
 
   @SubscribeMessage('partialRideDetails')
   async getPartialRideDetails(@MessageBody() data: PartialRideDetailsProps) {

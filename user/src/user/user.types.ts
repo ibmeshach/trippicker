@@ -1,3 +1,8 @@
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
 interface updateLocationOptions {
   address: string;
   currentLatitude: number;
@@ -23,4 +28,15 @@ interface getNearestDriverProps {
   maxDistance?: number;
   userLatitude: number;
   userLongitude: number;
+}
+
+interface UserRideResponseProps {
+  action: boolean;
+  cost: number;
+  range: number;
+  duration: number;
+  origin: LatLng;
+  destination: LatLng[];
+  user: any;
+  driver: any;
 }

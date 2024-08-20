@@ -1,37 +1,24 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 import { Driver } from './driver.entity';
 import { BaseModel } from './base.entity';
 import { User } from './user.entity';
 
 @Entity()
 export class Ride extends BaseModel {
-  @Column({ default: 'requested' })
+  @Column({ nullable: false })
   status: string;
 
-  @CreateDateColumn()
-  startTime: Date;
+  @Column({ nullable: false })
+  duration: string;
 
-  @Column({ nullable: true })
-  endTime: Date;
+  @Column('point', { nullable: false })
+  origin: { lat: number; lng: number }; // Assuming Postgres, use 'point' for geographic coordinates
 
-  @Column('point', { nullable: true })
-  startLocation: { x: number; y: number };
+  @Column('simple-json', { nullable: false })
+  destination: { lat: number; lng: number }[];
 
-  @Column('point', { nullable: true })
-  endLocation: { x: number; y: number };
-
-  @Column('float', { nullable: true })
-  estimatedFare: number;
-
-  @Column('float', { nullable: true })
-  finalFare: number;
+  @Column('float', { nullable: false })
+  cost: number;
 
   @Column({ nullable: true })
   paymentMethod: string;
@@ -42,9 +29,6 @@ export class Ride extends BaseModel {
   @Column({ nullable: true })
   distance: number;
 
-  @Column('float', { nullable: true })
-  duration: number;
-
   @Column({ nullable: true })
   feedback: string;
 
@@ -54,9 +38,13 @@ export class Ride extends BaseModel {
   @Column({ nullable: true })
   userRating: number;
 
-  @ManyToOne(() => User, (user) => user.rides)
+  @ManyToOne(() => User, (user) => user.rides, {
+    nullable: true,
+  })
   user: User;
 
-  @ManyToOne(() => Driver, (driver) => driver.rides)
+  @ManyToOne(() => Driver, (driver) => driver.rides, {
+    nullable: true,
+  })
   driver: Driver;
 }

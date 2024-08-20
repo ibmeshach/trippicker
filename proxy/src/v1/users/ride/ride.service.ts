@@ -1,15 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
 import { ClosestDriverEvent } from './ride.events';
-import { GatewayService } from 'src/v1/drivers/gateway/gateway.service';
+import { DriversGatewayService } from 'src/v1/drivers/gateway/gateway.service';
 
 @Injectable()
 export class RideService {
   constructor(
-    @Inject('USERS') private readonly usersClient: ClientProxy,
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
-    private readonly gatewayService: GatewayService,
+    @Inject(forwardRef(() => DriversGatewayService))
+    private readonly driverGatewayService: DriversGatewayService,
   ) {}
 
   async requestRide(body: RideRequestProps) {
@@ -30,7 +30,7 @@ export class RideService {
 
     const { user, driver } = await firstValueFrom(observableData);
 
-    return this.gatewayService.requestRide({
+    return this.driverGatewayService.requestRide({
       cost: body.cost,
       range: body.range,
       duration: body.duration,
