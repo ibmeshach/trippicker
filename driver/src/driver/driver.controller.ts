@@ -101,7 +101,7 @@ export class DriverController {
       );
 
       const userObservable = this.usersClient
-        .send('user.userDetails', new GetUserEvent(data.userId))
+        .send('user.userDetails', new GetUserEvent({ id: data.userId }))
         .pipe(
           catchError((error) => {
             throw error;
@@ -109,9 +109,6 @@ export class DriverController {
         );
 
       const user = await firstValueFrom(userObservable);
-
-      console.log(driver, 'driver');
-      console.log(user, 'user');
 
       return { driver, user };
     } catch (err) {

@@ -1,3 +1,3 @@
 export class GetUserEvent {
-  constructor(public readonly id: string) {}
+  constructor(public readonly data: { id: string }) {}
 }
