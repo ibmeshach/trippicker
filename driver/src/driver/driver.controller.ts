@@ -94,6 +94,7 @@ export class DriverController {
 
   @MessagePattern('driver.closestDriver')
   async requestRide(@Payload() { data }: { data: GetClosestDriverProps }) {
+    console.log(data);
     try {
       const driver = await this.driverService.findClosestDriver(
         data.origin.lat,

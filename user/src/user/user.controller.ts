@@ -72,6 +72,8 @@ export class UserController {
   @UseInterceptors(ClassSerializerInterceptor)
   async getUserDetails(@Payload() { data }: { data: { id: string } }) {
     try {
+      console.log(data);
+
       const user = await this.userService.findUserById(data.id);
 
       if (!user)
@@ -81,6 +83,7 @@ export class UserController {
 
       return { user: responseUser };
     } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {
