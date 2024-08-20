@@ -32,6 +32,7 @@ export class RideController {
       duration: body.duration,
       origin: body.origin,
       destination: body.destination,
+      driverId: '',
     });
   }
 }

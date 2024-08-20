@@ -44,12 +44,12 @@ export class GatewayService {
       );
   }
 
+  // requestRideResponse(payload: RequestRideGatewayProps): void {
+  //   this.server.emit(`rideRequestResponse:${payload.driver.id}`, payload);
+  // }
+
   @SubscribeMessage('partialRideDetails')
   async getPartialRideDetails(@MessageBody() data: PartialRideDetailsProps) {
-    // console.log('data', data);
-    // const parsedData: PartialRideDetailsProps = JSON.parse(data);
-    // console.log(parsedData);
-
     try {
       const driversObservable = this.driversClient
         .send(

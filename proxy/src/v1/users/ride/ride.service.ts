@@ -19,6 +19,7 @@ export class RideService {
         new ClosestDriverEvent({
           userId: body.id,
           origin: body.origin,
+          driverId: body.driverId,
         }),
       )
       .pipe(
