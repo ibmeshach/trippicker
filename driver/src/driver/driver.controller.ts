@@ -12,12 +12,15 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { GetUserEvent } from './driver.events';
 import { catchError, firstValueFrom } from 'rxjs';
+import { DriverEntity } from './serializers/driver.serializer';
+import { RideService } from 'src/ride/ride.service';
 
 @Controller('driver')
 export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
+    private readonly rideService: RideService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {}
 
@@ -110,7 +113,40 @@ export class DriverController {
 
       const user = await firstValueFrom(userObservable);
 
-      return { driver, user };
+      const responseDriver = new DriverEntity(driver);
+
+      return { driver: responseDriver, user };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.acceptedRide')
+  async acceptedRide(@Payload() { data }: { data: DriverRideResponseProps }) {
+    try {
+      if (!data.action)
+        throw new CustomException(
+          'Driver has not accepted the ride',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      const createRideData = {
+        ...data,
+        duration: data.duration.toString(),
+        distance: data.range,
+      };
+      const ride = this.rideService.create(createRideData);
+
+      ride.save();
+      return ride;
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {

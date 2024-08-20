@@ -6,10 +6,12 @@ import { UserController } from './user.controller';
 import { AuthService } from 'src/auth/services/auth.service';
 import { SmsService } from 'src/sms/sms.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RideService } from 'src/ride/ride.service';
+import { Ride } from 'src/entities/rides.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Ride]),
     ClientsModule.register([
       {
         name: 'DRIVERS',
@@ -21,7 +23,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       },
     ]),
   ],
-  providers: [UserService, AuthService, SmsService],
+  providers: [UserService, AuthService, SmsService, RideService],
   exports: [UserService],
   controllers: [UserController],
 })

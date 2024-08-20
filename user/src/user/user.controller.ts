@@ -14,12 +14,14 @@ import { CustomException } from 'src/custom.exception';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from './serializers/user.serializer';
+import { RideService } from 'src/ride/ride.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly rideService: RideService,
   ) {}
 
   @MessagePattern('user.updateLocation')
@@ -81,6 +83,37 @@ export class UserController {
 
       return { user: responseUser };
     } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.acceptedRide')
+  async acceptedRide(@Payload() { data }: { data: UserRideResponseProps }) {
+    try {
+      if (!data.action)
+        throw new CustomException(
+          'Driver has not accepted the ride',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      const createRideData = {
+        ...data,
+        duration: data.duration.toString(),
+        distance: data.range,
+      };
+      const ride = this.rideService.create(createRideData);
+
+      ride.save();
+      return ride;
+    } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {

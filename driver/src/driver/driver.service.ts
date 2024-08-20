@@ -144,45 +144,84 @@ export class DriverService {
     }
   }
 
-  async findClosestDriver(userLatitude: number, userLongitude: number) {
+  async findClosestDriver(
+    userLatitude: number,
+    userLongitude: number,
+    driverId: string = '',
+  ) {
     try {
-      const cacheKey = `closest-drivers:${userLatitude}:${userLongitude}`;
+      let blacklistedDriver: Driver = null;
+
+      // Step 1: Check if driverId is provided and blacklist the driver
+      if (driverId) {
+        blacklistedDriver = await this.findDriverById(driverId);
+        if (blacklistedDriver) {
+          // Set the driver's isAvailable to false
+          blacklistedDriver.isAvailable = false;
+          await this.driverRepository.save(blacklistedDriver);
+        }
+      }
+
+      // Step 2: Generate a unique cache key without the blacklisted driver
+      const cacheKey = `closest-drivers:${userLatitude}:${userLongitude}:${driverId}`;
       const cachedResult = await this.redisService.get(cacheKey);
 
       if (cachedResult) {
         return JSON.parse(cachedResult);
       }
-      const closestDriver = await this.driverRepository
-        .createQueryBuilder('driver')
-        .where('driver.isAvailable = :isAvailable', { isAvailable: true })
-        .andWhere('driver.isOnline = :isOnline', { isOnline: true })
-        .addSelect(
-          `(
-            6371 * acos(
-              cos(radians(:latitude)) * cos(radians(driver.currentLatitude))
-              * cos(radians(driver.currentLongitude) - radians(:longitude))
-              + sin(radians(:latitude)) * sin(radians(driver.currentLatitude))
-            )
-          )`,
-          'distance', // Calculate the distance and alias it as 'distance'
-        )
-        .setParameters({
-          latitude: userLatitude,
-          longitude: userLongitude,
-        })
-        .orderBy('distance', 'ASC') // Order by distance in ascending order (closest first)
-        .limit(1) // Limit the result to just 1
-        .getOne(); // Use `getOne()` to return a single closest driver
 
-      await this.redisService.set(
-        cacheKey,
-        JSON.stringify(closestDriver),
-        3600,
-      ); // Cache for 1 hour
+      const closestDriver = await this.getClosestDriver(
+        userLatitude,
+        userLongitude,
+        driverId,
+      );
+
+      if (closestDriver) {
+        // Step 4: Cache the result for the closest driver
+        await this.redisService.set(
+          cacheKey,
+          JSON.stringify(closestDriver),
+          3600,
+        ); // Cache for 1 hour
+      }
+
       return closestDriver;
     } catch (err) {
       console.log('error getting the closest driver', err);
     }
+  }
+
+  async getClosestDriver(
+    userLatitude: number,
+    userLongitude: number,
+    driverId: string,
+  ) {
+    const closestDriver = await this.driverRepository
+      .createQueryBuilder('driver')
+      .where('driver.isAvailable = :isAvailable', { isAvailable: true })
+      .andWhere('driver.isOnline = :isOnline', { isOnline: true })
+      .andWhere('driver.id != :blacklistedDriverId', {
+        blacklistedDriverId: driverId,
+      })
+      .addSelect(
+        `(
+        6371 * acos(
+          cos(radians(:latitude)) * cos(radians(driver.currentLatitude))
+          * cos(radians(driver.currentLongitude) - radians(:longitude))
+          + sin(radians(:latitude)) * sin(radians(driver.currentLatitude))
+        )
+      )`,
+        'distance', // Calculate the distance and alias it as 'distance'
+      )
+      .setParameters({
+        latitude: userLatitude,
+        longitude: userLongitude,
+      })
+      .orderBy('distance', 'ASC') // Order by distance in ascending order (closest first)
+      .limit(1) // Limit the result to just 1
+      .getOne(); // Use `getOne()` to return a single closest driver
+
+    return closestDriver;
   }
 
   getHaversineDistance(
