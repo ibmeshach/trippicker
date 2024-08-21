@@ -21,3 +21,24 @@ interface GetNearestDriversProps {
   userLatitude: number;
   userLongitude: number;
 }
+
+interface RequestRideGatewayProps {
+  cost: number;
+  range: number;
+  duration: number;
+  origin: LatLng;
+  destination: LatLng[];
+  driver: any;
+  user: any;
+}
+
+interface DriverRideResponseProps {
+  action: boolean;
+  cost: number;
+  range: number;
+  duration: number;
+  origin: LatLng;
+  destination: LatLng[];
+  user: any;
+  driver: any;
+}

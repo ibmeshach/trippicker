@@ -26,7 +26,7 @@ import { MapsService } from 'src/v1/maps/maps.service';
 import { RideService } from '../users/ride/ride.service';
 import { EventsService } from '../events/events.service';
 
-@WebSocketGateway({ namespace: 'v1' })
+@WebSocketGateway({ namespace: 'v1/events' })
 export class GatewayService implements OnModuleInit {
   private retryCounts: Map<string, number> = new Map();
 
