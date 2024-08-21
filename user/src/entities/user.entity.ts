@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { Driver } from './driver.entity';
@@ -32,7 +32,9 @@ export class User extends BaseModel {
   @Column({ type: 'float', nullable: true })
   currentLongitude: number;
 
-  @OneToMany(() => Ride, (ride) => ride.user)
+  @OneToMany(() => Ride, (ride) => ride.user, {
+    onDelete: 'CASCADE',
+  })
   rides: Ride[];
 
   @OneToMany(() => Driver, (driver) => driver.user)

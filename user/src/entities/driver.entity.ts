@@ -11,7 +11,7 @@ export class Driver extends BaseModel {
   @Column({ unique: true })
   email: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: false })
   phoneNumber: string;
 
   @Column()
@@ -25,6 +25,9 @@ export class Driver extends BaseModel {
 
   @Column()
   vehicleColor: string;
+
+  @Column({ nullable: true })
+  address: string;
 
   @Column({ type: 'float', nullable: true })
   currentLatitude: number;
@@ -44,10 +47,18 @@ export class Driver extends BaseModel {
   @Column({ default: 0 })
   numberOfRides: number;
 
+  @Column({ nullable: true })
+  otpToken?: string;
+
   @Column({ default: 0 })
   totalEarnings: number;
 
-  @OneToMany(() => Ride, (ride) => ride.driver)
+  @Column({ default: false })
+  isPhoneNumberConfirmed: boolean;
+
+  @OneToMany(() => Ride, (ride) => ride.driver, {
+    onDelete: 'CASCADE',
+  })
   rides: Ride[];
 
   @ManyToOne(() => User, (user) => user.drivers)

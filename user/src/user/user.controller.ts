@@ -15,14 +15,22 @@ import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from './serializers/user.serializer';
 import { RideService } from 'src/ride/ride.service';
+import { DataSource, QueryRunner } from 'typeorm';
+import { Driver } from 'src/entities/driver.entity';
+import { Ride } from 'src/entities/rides.entity';
 
 @Controller('user')
 export class UserController {
+  private queryRunner: QueryRunner;
+
   constructor(
+    private dataSource: DataSource,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
     private readonly rideService: RideService,
-  ) {}
+  ) {
+    this.queryRunner = this.dataSource.createQueryRunner();
+  }
 
   @MessagePattern('user.updateLocation')
   @UseInterceptors(ClassSerializerInterceptor)
@@ -74,8 +82,6 @@ export class UserController {
   @UseInterceptors(ClassSerializerInterceptor)
   async getUserDetails(@Payload() { data }: { data: { id: string } }) {
     try {
-      console.log(data);
-
       const user = await this.userService.findUserById(data.id);
 
       if (!user)
@@ -83,7 +89,7 @@ export class UserController {
 
       const responseUser = new UserEntity(user);
 
-      return { user: responseUser };
+      return responseUser;
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {
@@ -96,9 +102,10 @@ export class UserController {
       }
     }
   }
-
   @MessagePattern('user.acceptedRide')
   async acceptedRide(@Payload() { data }: { data: UserRideResponseProps }) {
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
     try {
       if (!data.action)
         throw new CustomException(
@@ -106,16 +113,42 @@ export class UserController {
           HttpStatus.BAD_REQUEST,
         );
 
+      let driver = await this.queryRunner.manager.findOne(Driver, {
+        where: { phoneNumber: data.driver.phoneNumber },
+      });
+
+      delete data.driver.id;
+      if (!driver) {
+        // Create a new user if it does not exist
+        driver = this.queryRunner.manager.create(Driver, data.driver);
+        await this.queryRunner.manager.save(driver);
+      } else {
+        // Update the existing user if needed
+        await this.queryRunner.manager.update(
+          Driver,
+          { phoneNumber: data.user.phoneNumber },
+          data.driver,
+        );
+      }
+
+      const user = await this.userService.findUserById(data.user.id);
+
       const createRideData = {
         ...data,
         duration: data.duration.toString(),
         distance: data.range,
+        user: user,
+        driver: driver,
       };
-      const ride = this.rideService.create(createRideData);
 
-      ride.save();
+      const ride = this.queryRunner.manager.create(Ride, createRideData);
+      await this.queryRunner.manager.save(ride);
+      await this.queryRunner.manager.save(driver);
+
+      await this.queryRunner.commitTransaction();
       return ride;
     } catch (err) {
+      await this.queryRunner.rollbackTransaction();
       console.log(err);
       if (err instanceof CustomException) {
         throw err;

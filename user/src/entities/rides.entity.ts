@@ -1,18 +1,18 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, Point, JoinColumn } from 'typeorm';
 import { Driver } from './driver.entity';
 import { BaseModel } from './base.entity';
 import { User } from './user.entity';
 
 @Entity()
 export class Ride extends BaseModel {
-  @Column({ nullable: false })
+  @Column({ default: 'booked' })
   status: string;
 
   @Column({ nullable: false })
   duration: string;
 
-  @Column('point', { nullable: false })
-  origin: { lat: number; lng: number }; // Assuming Postgres, use 'point' for geographic coordinates
+  @Column('jsonb')
+  origin: { lat: number; lng: number };
 
   @Column('simple-json', { nullable: false })
   destination: { lat: number; lng: number }[];
