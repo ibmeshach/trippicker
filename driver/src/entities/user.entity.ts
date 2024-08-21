@@ -32,7 +32,9 @@ export class User extends BaseModel {
   @Column({ type: 'float', nullable: true })
   currentLongitude: number;
 
-  @OneToMany(() => Ride, (ride) => ride.user)
+  @OneToMany(() => Ride, (ride) => ride.user, {
+    onDelete: 'CASCADE',
+  })
   rides: Ride[];
 
   @ManyToOne(() => Driver, (driver) => driver.users)

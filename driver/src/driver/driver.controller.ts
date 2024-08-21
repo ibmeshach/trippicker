@@ -14,15 +14,25 @@ import { GetUserEvent } from './driver.events';
 import { catchError, firstValueFrom } from 'rxjs';
 import { DriverEntity } from './serializers/driver.serializer';
 import { RideService } from 'src/ride/ride.service';
+import { UserService } from 'src/user/user.service';
+import { DataSource, QueryRunner } from 'typeorm';
+import { User } from 'src/entities/user.entity';
+import { Ride } from 'src/entities/rides.entity';
 
 @Controller('driver')
 export class DriverController {
+  private queryRunner: QueryRunner;
+
   constructor(
+    private dataSource: DataSource,
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
     private readonly rideService: RideService,
+    private readonly userService: UserService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
-  ) {}
+  ) {
+    this.queryRunner = this.dataSource.createQueryRunner();
+  }
 
   @MessagePattern('driver.updateLocation')
   @UseInterceptors(ClassSerializerInterceptor)
@@ -97,7 +107,6 @@ export class DriverController {
 
   @MessagePattern('driver.closestDriver')
   async requestRide(@Payload() { data }: { data: GetClosestDriverProps }) {
-    console.log(data);
     try {
       const driver = await this.driverService.findClosestDriver(
         data.origin.lat,
@@ -132,6 +141,8 @@ export class DriverController {
 
   @MessagePattern('driver.acceptedRide')
   async acceptedRide(@Payload() { data }: { data: DriverRideResponseProps }) {
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
     try {
       if (!data.action)
         throw new CustomException(
@@ -139,16 +150,43 @@ export class DriverController {
           HttpStatus.BAD_REQUEST,
         );
 
+      let user = await this.userService.findUserByPhoneNumberLock(
+        data.user.phoneNumber,
+        this.queryRunner.manager,
+      );
+
+      delete data.user.id;
+      if (!user) {
+        // Create a new user if it does not exist
+        user = this.queryRunner.manager.create(User, data.user);
+        await this.queryRunner.manager.save(user);
+      } else {
+        // Update the existing user if needed
+        await this.queryRunner.manager.update(
+          User,
+          { phoneNumber: data.user.phoneNumber },
+          data.user,
+        );
+      }
+
+      const driver = await this.driverService.findDriverById(data.driver.id);
+
       const createRideData = {
         ...data,
         duration: data.duration.toString(),
         distance: data.range,
+        user: user,
+        driver: driver,
       };
-      const ride = this.rideService.create(createRideData);
 
-      ride.save();
+      const ride = this.queryRunner.manager.create(Ride, createRideData);
+      await this.queryRunner.manager.save(ride);
+      await this.queryRunner.manager.save(user);
+
+      await this.queryRunner.commitTransaction();
       return ride;
     } catch (err) {
+      await this.queryRunner.rollbackTransaction();
       console.log(err);
       if (err instanceof CustomException) {
         throw err;

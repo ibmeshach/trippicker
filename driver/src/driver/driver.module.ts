@@ -3,16 +3,17 @@ import { DriverService } from './driver.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Driver } from 'src/entities/driver.entity';
 import { DriverController } from './driver.controller';
-import { AuthService } from 'src/auth/auth.service';
 import { SmsService } from 'src/sms/sms.service';
 import { RedisConfigService } from 'src/config/redis.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RideService } from 'src/ride/ride.service';
 import { Ride } from 'src/entities/rides.entity';
+import { UserService } from 'src/user/user.service';
+import { User } from 'src/entities/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Driver, Ride]),
+    TypeOrmModule.forFeature([Driver, Ride, User]),
     ClientsModule.register([
       {
         name: 'USERS',
@@ -24,7 +25,13 @@ import { Ride } from 'src/entities/rides.entity';
       },
     ]),
   ],
-  providers: [DriverService, SmsService, RedisConfigService, RideService],
+  providers: [
+    DriverService,
+    SmsService,
+    RedisConfigService,
+    RideService,
+    UserService,
+  ],
   controllers: [DriverController],
 })
 export class DriverModule {}

@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, Index } from 'typeorm';
+import { Entity, Column, OneToMany, Index } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { User } from './user.entity';
@@ -59,7 +59,9 @@ export class Driver extends BaseModel {
   @Column({ default: false })
   isPhoneNumberConfirmed: boolean;
 
-  @OneToMany(() => Ride, (ride) => ride.driver)
+  @OneToMany(() => Ride, (ride) => ride.driver, {
+    onDelete: 'CASCADE',
+  })
   rides: Ride[];
 
   @OneToMany(() => User, (user) => user.driver)

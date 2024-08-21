@@ -12,6 +12,7 @@ import { DriverModule } from './driver/driver.module';
 import { SmsModule } from './sms/sms.module';
 import { RedisConfigService } from './config/redis.service';
 import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { JwtModule } from '@nestjs/jwt';
     RideModule,
     DriverModule,
     SmsModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],

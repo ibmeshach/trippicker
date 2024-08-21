@@ -196,13 +196,18 @@ export class DriverService {
     userLongitude: number,
     driverId: string,
   ) {
-    const closestDriver = await this.driverRepository
+    const queryBuilder = this.driverRepository
       .createQueryBuilder('driver')
       .where('driver.isAvailable = :isAvailable', { isAvailable: true })
-      .andWhere('driver.isOnline = :isOnline', { isOnline: true })
-      .andWhere('driver.id != :blacklistedDriverId', {
+      .andWhere('driver.isOnline = :isOnline', { isOnline: true });
+
+    if (driverId) {
+      queryBuilder.andWhere('driver.id != :blacklistedDriverId', {
         blacklistedDriverId: driverId,
-      })
+      });
+    }
+
+    const closestDriver = await queryBuilder
       .addSelect(
         `(
         6371 * acos(
@@ -211,7 +216,7 @@ export class DriverService {
           + sin(radians(:latitude)) * sin(radians(driver.currentLatitude))
         )
       )`,
-        'distance', // Calculate the distance and alias it as 'distance'
+        'distance',
       )
       .setParameters({
         latitude: userLatitude,
