@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { DriversGatewayService } from './gateway.service';
+import { GatewayService } from './gateway.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MapsService } from 'src/v1/maps/maps.service';
-import { RideService } from 'src/v1/users/ride/ride.service';
-import { UsersGatewayService } from 'src/v1/users/gateway/gateway.service';
-import { UserRideModule } from 'src/v1/users/ride/ride.module';
+import { RideService } from '../users/ride/ride.service';
+import { EventsModule } from '../events/events.module';
 
 @Module({
   imports: [
@@ -26,8 +25,8 @@ import { UserRideModule } from 'src/v1/users/ride/ride.module';
         },
       },
     ]),
+    EventsModule,
   ],
-  providers: [],
-  exports: [],
+  providers: [GatewayService, MapsService, RideService],
 })
-export class DriversGatewayModule {}
+export class GatewayModule {}

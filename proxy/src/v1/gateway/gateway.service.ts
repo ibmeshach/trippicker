@@ -1,0 +1,189 @@
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  OnModuleInit,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { ClientProxy } from '@nestjs/microservices';
+import { Server, Socket } from 'socket.io';
+import { catchError, firstValueFrom } from 'rxjs';
+import {
+  BookRideEvent,
+  GetNearestDriversEvent,
+  UpdateDriverLocationEvent,
+  UpdateUserLocationEvent,
+} from './gateway.events';
+import { MapsService } from 'src/v1/maps/maps.service';
+import { RideService } from '../users/ride/ride.service';
+import { EventsService } from '../events/events.service';
+
+@WebSocketGateway({ namespace: 'v1' })
+export class GatewayService implements OnModuleInit {
+  private retryCounts: Map<string, number> = new Map();
+
+  configService: any;
+  constructor(
+    @Inject('USERS') private readonly usersClient: ClientProxy,
+    @Inject('DRIVERS') private readonly driversClient: ClientProxy,
+    private readonly mapsService: MapsService,
+    private readonly rideService: RideService,
+    private readonly eventsService: EventsService,
+  ) {}
+
+  onModuleInit() {
+    this.eventsService.rideRequested$.subscribe((payload) => {
+      this.requestRide(payload);
+    });
+  }
+  @WebSocketServer() server: Server;
+
+  @SubscribeMessage('user.updateLocation')
+  async userUpdateLocation(
+    @MessageBody() data: Partial<UpdateLocationsProps>,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const token = socket.handshake.headers['authorization'];
+
+    return this.usersClient
+      .send(
+        'user.updateLocation',
+        new UpdateUserLocationEvent({
+          token,
+          address: data.address,
+          currentLatitude: data.currentLatitude,
+          currentLongitude: data.currentLongitude,
+        }),
+      )
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+  }
+
+  requestRideResponse(payload: RequestRideGatewayProps): void {
+    this.server.emit(`user.rideRequestResponse:${payload.user.id}`, payload);
+  }
+
+  @SubscribeMessage('user.partialRideDetails')
+  async getPartialRideDetails(@MessageBody() data: PartialRideDetailsProps) {
+    try {
+      const driversObservable = this.driversClient
+        .send(
+          'driver.getNearestDrivers',
+          new GetNearestDriversEvent({
+            maxDistance: data.distance,
+            userLatitude: data.origin.lat,
+            userLongitude: data.origin.lng,
+          }),
+        )
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      const drivers = await firstValueFrom(driversObservable);
+      const rideDetails = await this.mapsService.getRideDetails(
+        data.origin,
+        data.destination,
+      );
+      return {
+        drivers,
+        duration: rideDetails.duration,
+        range: rideDetails.distance,
+        cost: rideDetails.cost,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // driver
+
+  @SubscribeMessage('driver.updateLocation')
+  async driverUpdateLocation(
+    @MessageBody() data: Partial<UpdateLocationsProps>,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const token = socket.handshake.headers['authorization'];
+
+    return this.driversClient
+      .send(
+        'driver.updateLocation',
+        new UpdateDriverLocationEvent({
+          token,
+          address: data.address,
+          currentLatitude: data.currentLatitude,
+          currentLongitude: data.currentLongitude,
+        }),
+      )
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+  }
+
+  @SubscribeMessage('driver.driverRideResponse')
+  async driverRideResponse(@MessageBody() data: DriverRideResponseProps) {
+    const userId = data.user.id;
+    const currentRetryCount = this.retryCounts.get(userId) || 0;
+
+    if (data.action) {
+      this.retryCounts.set(userId, 0);
+      const observableDriverRide = this.driversClient
+        .send('driver.acceptedRide', new BookRideEvent(data))
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      const observableUserRide = this.usersClient
+        .send('user.acceptedRide', new BookRideEvent(data))
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      const driverRide = await firstValueFrom(observableDriverRide);
+      const userRide = await firstValueFrom(observableUserRide);
+
+      this.requestRideResponse(userRide);
+
+      return userRide;
+    } else {
+      if (currentRetryCount < 3) {
+        this.retryCounts.set(userId, currentRetryCount + 1);
+
+        return await this.rideService.requestRide({
+          id: userId,
+          driverId: data.driver.id,
+          cost: data.cost,
+          range: data.range,
+          duration: data.duration,
+          origin: data.origin,
+          destination: data.destination,
+        });
+      } else {
+        this.retryCounts.set(userId, 0);
+        return 'Max retry attempts reached for user';
+      }
+    }
+  }
+
+  requestRide(payload: RequestRideGatewayProps): void {
+    this.server.emit(`driver.rideRequest:${payload.driver.id}`, payload);
+  }
+}

@@ -13,10 +13,10 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { UsersGatewayModule } from './v1/users/gateway/gateway.module';
-import { DriversGatewayModule } from './v1/drivers/gateway/gateway.module';
 import { MapsModule } from './v1/maps/maps.module';
 import { UserRideModule } from './v1/users/ride/ride.module';
+import { GatewayModule } from './v1/gateway/gateway.module';
+import { EventsModule } from './v1/events/events.module';
 
 @Module({
   imports: [
@@ -52,9 +52,9 @@ import { UserRideModule } from './v1/users/ride/ride.module';
     MapsModule,
     DriversAuthModule,
     UsersAuthModule,
-    UsersGatewayModule,
-    DriversGatewayModule,
+    GatewayModule,
     UserRideModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
