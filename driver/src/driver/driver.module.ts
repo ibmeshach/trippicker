@@ -19,7 +19,7 @@ import { User } from 'src/entities/user.entity';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
