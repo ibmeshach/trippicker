@@ -26,6 +26,7 @@ import { EventsService } from '../events/events.service';
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  transports: ['websocket'],
 })
 export class GatewayService implements OnModuleInit {
   private retryCounts: Map<string, number> = new Map();
