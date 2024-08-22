@@ -150,6 +150,28 @@ export class GatewayService implements OnModuleInit {
       );
   }
 
+  // @SubscribeMessage('driver.test')
+  // async test(
+  //   @MessageBody() data: Partial<UpdateLocationsProps>,
+  //   @ConnectedSocket() socket: Socket,
+  // ) {
+  //   this.driversClient
+  //     .send(
+  //       'driver.saveChatMessage',
+  //       new SaveChatMessageEvent({
+  //         token,
+  //         role,
+  //         rideId: roomId,
+  //         content: message,
+  //       }),
+  //     )
+  //     .pipe(
+  //       catchError((error) => {
+  //         throw error;
+  //       }),
+  //     );
+  // }
+
   @SubscribeMessage('driver.driverRideResponse')
   async driverRideResponse(@MessageBody() data: DriverRideResponseProps) {
     const userId = data.user.id;

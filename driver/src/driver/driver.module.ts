@@ -10,10 +10,12 @@ import { RideService } from 'src/ride/ride.service';
 import { Ride } from 'src/entities/rides.entity';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
+import { ChatsService } from 'src/chats/chats.service';
+import { ChatMessage } from 'src/entities/chatMessage.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Driver, Ride, User]),
+    TypeOrmModule.forFeature([Driver, Ride, User, ChatMessage]),
     ClientsModule.register([
       {
         name: 'USERS',
@@ -31,6 +33,7 @@ import { User } from 'src/entities/user.entity';
     RedisConfigService,
     RideService,
     UserService,
+    ChatsService,
   ],
   controllers: [DriverController],
 })

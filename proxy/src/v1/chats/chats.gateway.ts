@@ -7,19 +7,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { BookRideEvent } from '../gateway.events';
 import { catchError } from 'rxjs';
 import { SaveChatMessageEvent } from './chat.events';
 
-@WebSocketGateway({
-  namespace: 'v1/events/chat',
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-  transports: ['websocket'],
-})
 @WebSocketGateway({
   namespace: 'v1/events/chat',
   cors: {
@@ -51,6 +41,7 @@ export class ChatGateway implements OnGatewayConnection {
     const { roomId, message } = payload;
     const { token, role } = client.data;
 
+    console.log('get here first', payload);
     this.driversClient
       .send(
         'driver.saveChatMessage',
@@ -83,6 +74,7 @@ export class ChatGateway implements OnGatewayConnection {
         }),
       );
 
-    this.server.to(roomId).emit('message', { token, role, message });
+    console.log('get here second and last');
+    this.server.to(roomId).emit('message', { message });
   }
 }
