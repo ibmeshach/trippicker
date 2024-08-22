@@ -26,6 +26,7 @@ import { EventsService } from '../events/events.service';
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  transports: ['websocket'],
 })
 export class GatewayService implements OnModuleInit {
   private retryCounts: Map<string, number> = new Map();
@@ -52,8 +53,9 @@ export class GatewayService implements OnModuleInit {
     @ConnectedSocket() socket: Socket,
   ) {
     const token = socket.handshake.headers['authorization'];
+    console.log(token, 'token');
 
-    return this.usersClient
+    const observable = this.usersClient
       .send(
         'user.updateLocation',
         new UpdateUserLocationEvent({
@@ -68,6 +70,12 @@ export class GatewayService implements OnModuleInit {
           throw error;
         }),
       );
+
+    const value = await firstValueFrom(observable);
+
+    console.log(value);
+
+    return value;
   }
 
   requestRideResponse(payload: RequestRideGatewayProps): void {
@@ -97,6 +105,14 @@ export class GatewayService implements OnModuleInit {
         data.origin,
         data.destination,
       );
+
+      console.log('partialrides', {
+        drivers,
+        duration: rideDetails.duration,
+        range: rideDetails.distance,
+        cost: rideDetails.cost,
+      });
+
       return {
         drivers,
         duration: rideDetails.duration,

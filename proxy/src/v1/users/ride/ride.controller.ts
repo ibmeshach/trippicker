@@ -25,7 +25,7 @@ export class RideController {
   ): Promise<any> {
     const userId = req['user'].sub;
 
-    return await this.rideService.requestRide({
+    await this.rideService.requestRide({
       id: userId,
       cost: body.cost,
       range: body.range,
@@ -34,5 +34,7 @@ export class RideController {
       destination: body.destination,
       driverId: '',
     });
+
+    return 'success';
   }
 }
