@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  OnModuleInit,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Inject, OnModuleInit } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -26,7 +19,14 @@ import { MapsService } from 'src/v1/maps/maps.service';
 import { RideService } from '../users/ride/ride.service';
 import { EventsService } from '../events/events.service';
 
-@WebSocketGateway({ namespace: 'v1/events' })
+@WebSocketGateway({
+  namespace: 'v1/events',
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+})
 export class GatewayService implements OnModuleInit {
   private retryCounts: Map<string, number> = new Map();
 
