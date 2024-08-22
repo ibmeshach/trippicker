@@ -17,6 +17,7 @@ import { MapsModule } from './v1/maps/maps.module';
 import { UserRideModule } from './v1/users/ride/ride.module';
 import { GatewayModule } from './v1/gateway/gateway.module';
 import { EventsModule } from './v1/events/events.module';
+import { ChatsModule } from './v1/chats/chats.module';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { EventsModule } from './v1/events/events.module';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          host: 'users-nestjs-backend.railway.internal',
+          // host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
@@ -33,7 +34,7 @@ import { EventsModule } from './v1/events/events.module';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
@@ -55,6 +56,7 @@ import { EventsModule } from './v1/events/events.module';
     GatewayModule,
     UserRideModule,
     EventsModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

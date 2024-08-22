@@ -48,3 +48,10 @@ interface DriverRideResponseProps {
   user: any;
   driver: any;
 }
+
+interface SaveChatMessageProps {
+  role: string;
+  token: string;
+  rideId: string;
+  content: string;
+}

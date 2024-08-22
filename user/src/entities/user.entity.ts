@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { Driver } from './driver.entity';
+import { ChatMessage } from './chatMessage.entity';
 
 @Entity('User')
 export class User extends BaseModel {
@@ -36,6 +37,11 @@ export class User extends BaseModel {
     onDelete: 'CASCADE',
   })
   rides: Ride[];
+
+  @OneToMany(() => ChatMessage, (chats) => chats.user, {
+    onDelete: 'CASCADE',
+  })
+  chats: ChatMessage[];
 
   @OneToMany(() => Driver, (driver) => driver.user)
   drivers: Driver[];

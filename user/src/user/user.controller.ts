@@ -18,6 +18,7 @@ import { RideService } from 'src/ride/ride.service';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Driver } from 'src/entities/driver.entity';
 import { Ride } from 'src/entities/rides.entity';
+import { ChatsService } from 'src/chats/chats.service';
 
 @Controller('user')
 export class UserController {
@@ -27,7 +28,7 @@ export class UserController {
     private dataSource: DataSource,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
-    private readonly rideService: RideService,
+    private readonly chatService: ChatsService,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
   }
@@ -102,6 +103,7 @@ export class UserController {
       }
     }
   }
+
   @MessagePattern('user.acceptedRide')
   async acceptedRide(@Payload() { data }: { data: UserRideResponseProps }) {
     await this.queryRunner.connect();
@@ -149,6 +151,48 @@ export class UserController {
       return ride;
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  // handle chat messages
+  @MessagePattern('user.saveChatMessage')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async saveChatMessage(@Payload() { data }: { data: SaveChatMessageProps }) {
+    try {
+      console.log('get here', data);
+      const secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
+      const payload = await this.userService.decodejwtToken(data.token, secret);
+
+      if (!payload)
+        throw new CustomException(
+          'Invalid or expired jwt token',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      const userId = payload.sub;
+
+      const createChatData = {
+        owner: data.role === 'user' ? true : false,
+        rideId: data.rideId,
+        content: data.content,
+        userId: userId,
+      };
+
+      const chatMessage = this.chatService.create(createChatData);
+
+      console.log('chatMessage', chatMessage);
+      chatMessage.save();
+      return true;
+    } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {
         throw err;

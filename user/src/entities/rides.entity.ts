@@ -1,7 +1,15 @@
-import { Entity, Column, ManyToOne, Point, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  Point,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
 import { Driver } from './driver.entity';
 import { BaseModel } from './base.entity';
 import { User } from './user.entity';
+import { ChatMessage } from './chatMessage.entity';
 
 @Entity()
 export class Ride extends BaseModel {
@@ -37,6 +45,9 @@ export class Ride extends BaseModel {
 
   @Column({ nullable: true })
   userRating: number;
+
+  @OneToOne(() => ChatMessage, (chatMessage) => chatMessage.ride)
+  chatMessage: ChatMessage;
 
   @ManyToOne(() => User, (user) => user.rides, {
     nullable: true,
