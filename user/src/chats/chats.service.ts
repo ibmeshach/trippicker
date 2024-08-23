@@ -14,4 +14,17 @@ export class ChatsService {
     const user = this.chatRepository.create(createUserData);
     return user;
   }
+
+  async getAllChatMessages(rideId: string): Promise<ChatMessage[]> {
+    const chatsMessages = await this.chatRepository.find({
+      where: {
+        rideId,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+
+    return chatsMessages;
+  }
 }

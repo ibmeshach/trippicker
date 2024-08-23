@@ -8,12 +8,11 @@ import { SmsService } from 'src/sms/sms.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RideService } from 'src/ride/ride.service';
 import { Ride } from 'src/entities/rides.entity';
-import { ChatsService } from 'src/chats/chats.service';
 import { ChatMessage } from 'src/entities/chatMessage.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Ride, ChatMessage]),
+    TypeOrmModule.forFeature([User, Ride]),
     ClientsModule.register([
       {
         name: 'DRIVERS',
@@ -25,7 +24,7 @@ import { ChatMessage } from 'src/entities/chatMessage.entity';
       },
     ]),
   ],
-  providers: [UserService, AuthService, SmsService, RideService, ChatsService],
+  providers: [UserService, AuthService, SmsService, RideService],
   exports: [UserService],
   controllers: [UserController],
 })

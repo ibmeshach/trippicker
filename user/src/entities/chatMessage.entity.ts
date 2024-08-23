@@ -8,18 +8,18 @@ export class ChatMessage extends BaseModel {
   @Column({ nullable: false })
   owner: boolean;
 
-  @Column({ nullable: false })
+  @Column({ unique: true, nullable: false })
   rideId: string;
-
-  @OneToOne(() => Ride)
-  @JoinColumn({ name: 'rideId' })
-  ride: Ride;
 
   @Column({ nullable: false })
   content: string;
 
   @Column({ nullable: false })
   userId: string;
+
+  @OneToOne(() => Ride)
+  @JoinColumn({ name: 'rideId' })
+  ride: Ride;
 
   @ManyToOne(() => User, (user) => user.chats)
   @JoinColumn({ name: 'userId' })
