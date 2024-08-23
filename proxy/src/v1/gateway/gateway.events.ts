@@ -11,5 +11,5 @@ export class UpdateDriverLocationEvent {
 }
 
 export class BookRideEvent {
-  constructor(public readonly data: DriverRideResponseProps) {}
+  constructor(public readonly data: DriverRideResponseFinalProps) {}
 }

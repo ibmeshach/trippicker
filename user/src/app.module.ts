@@ -15,9 +15,19 @@ import { Ride } from './entities/rides.entity';
 import { UserModule } from './user/user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ChatsModule } from './chats/chats.module';
+import { TwilioModule } from 'nestjs-twilio';
 
 @Module({
   imports: [
+    TwilioModule.forRootAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      imports: [ConfigModule],
+      useFactory: (cfg: ConfigService) => ({
+        accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
+        authToken: cfg.get('TWILIO_AUTH_TOKEN'),
+      }),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
@@ -36,6 +46,11 @@ import { ChatsModule } from './chats/chats.module';
         const configDatabaseService = new ConfigDatabaseService(configService);
         return configDatabaseService.getTypeOrmConfig();
       },
+    }),
+
+    TwilioModule.forRoot({
+      accountSid: process.env.TWILIO_ACCOUNT_SID,
+      authToken: process.env.TWILIO_AUTH_TOKEN,
     }),
 
     ClientsModule.register([

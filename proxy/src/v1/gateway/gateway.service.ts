@@ -18,7 +18,7 @@ import {
 import { MapsService } from 'src/v1/maps/maps.service';
 import { RideService } from '../users/ride/ride.service';
 import { EventsService } from '../events/events.service';
-import { SaveChatMessageEvent } from '../chats/chat.events';
+import { v4 as uuidv4 } from 'uuid';
 
 @WebSocketGateway({
   namespace: 'v1/events',
@@ -165,11 +165,18 @@ export class GatewayService implements OnModuleInit {
   async driverRideResponse(@MessageBody() data: DriverRideResponseProps) {
     const userId = data.user.id;
     const currentRetryCount = this.retryCounts.get(userId) || 0;
+    const rideId = this.generateRideId();
 
     if (data.action) {
       this.retryCounts.set(userId, 0);
       const observableDriverRide = this.driversClient
-        .send('driver.acceptedRide', new BookRideEvent(data))
+        .send(
+          'driver.acceptedRide',
+          new BookRideEvent({
+            rideId,
+            ...data,
+          }),
+        )
         .pipe(
           catchError((error) => {
             throw error;
@@ -177,7 +184,7 @@ export class GatewayService implements OnModuleInit {
         );
 
       const observableUserRide = this.usersClient
-        .send('user.acceptedRide', new BookRideEvent(data))
+        .send('user.acceptedRide', new BookRideEvent({ rideId, ...data }))
         .pipe(
           catchError((error) => {
             throw error;
@@ -212,5 +219,12 @@ export class GatewayService implements OnModuleInit {
 
   requestRide(payload: RequestRideGatewayProps): void {
     this.server.emit(`driver.rideRequest:${payload.driver.id}`, payload);
+  }
+
+  private generateRideId(): string {
+    const timestamp = Date.now().toString(); // Get current timestamp
+    const randomValue = uuidv4(); // Generate a random UUID for additional uniqueness
+    const combined = `${timestamp}-${randomValue}`; // Combine the timestamp and UUID
+    return Buffer.from(combined).toString('base64'); // Convert the combined string to Base64
   }
 }

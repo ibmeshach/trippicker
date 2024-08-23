@@ -7,9 +7,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { SmsService } from 'src/sms/sms.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { TwilioModule, TwilioService } from 'nestjs-twilio';
+import { ConfigModule } from '@nestjs/config';
+import { AppService } from '../app.service';
 
 @Module({
   imports: [
+    ConfigModule, // Ensure ConfigModule is imported
+
     JwtModule.register({
       global: true,
     }),
@@ -19,13 +24,13 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, SmsService],
+  providers: [AuthService, UserService, SmsService, AppService],
 })
 export class AuthModule {}

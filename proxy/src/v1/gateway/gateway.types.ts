@@ -42,3 +42,15 @@ interface DriverRideResponseProps {
   user: any;
   driver: any;
 }
+
+interface DriverRideResponseFinalProps {
+  action: boolean;
+  cost: number;
+  range: number;
+  duration: number;
+  origin: LatLng;
+  destination: LatLng[];
+  user: any;
+  driver: any;
+  rideId: string;
+}
