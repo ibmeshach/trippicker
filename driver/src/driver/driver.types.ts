@@ -47,6 +47,7 @@ interface DriverRideResponseProps {
   destination: LatLng[];
   user: any;
   driver: any;
+  rideId: string;
 }
 
 interface SaveChatMessageProps {

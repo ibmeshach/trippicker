@@ -144,6 +144,8 @@ export class DriverController {
   async acceptedRide(@Payload() { data }: { data: DriverRideResponseProps }) {
     await this.queryRunner.connect();
     await this.queryRunner.startTransaction();
+
+    console.log('data', data);
     try {
       if (!data.action)
         throw new CustomException(

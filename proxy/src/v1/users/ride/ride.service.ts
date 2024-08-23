@@ -31,16 +31,6 @@ export class RideService {
 
     const { user, driver } = await firstValueFrom(observableData);
 
-    // return this.gatewayService.requestRide({
-    //   cost: body.cost,
-    //   range: body.range,
-    //   duration: body.duration,
-    //   origin: body.origin,
-    //   destination: body.destination,
-    //   driver: driver,
-    //   user: user,
-    // });
-
     this.eventsService.emitRideRequested({
       cost: body.cost,
       range: body.range,

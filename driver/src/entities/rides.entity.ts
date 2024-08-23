@@ -13,6 +13,9 @@ import { ChatMessage } from './chatMessage.entity';
 
 @Entity()
 export class Ride extends BaseModel {
+  @Column({ unique: true, nullable: false })
+  rideId: string;
+
   @Column({ default: 'booked' })
   status: string;
 
