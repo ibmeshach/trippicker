@@ -22,7 +22,7 @@ export class ChatsService {
     const chatsMessages = await this.chatRepository.find({
       where: {
         driverId,
-        rideId,
+        rideKey: rideId,
       },
       order: {
         createdAt: 'ASC',

@@ -29,7 +29,7 @@ export class ChatsController {
 
       const createChatData = {
         owner: data.role === 'driver' ? true : false,
-        rideId: data.rideId,
+        rideKey: data.rideId,
         ride,
         content: data.content,
         driverId: data.driverId,
