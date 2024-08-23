@@ -10,6 +10,11 @@ export class RideService {
     private rideRepository: Repository<Ride>,
   ) {}
 
+  async findRideByRideId(rideId: string): Promise<Ride> {
+    const ride = await this.rideRepository.findOneBy({ rideId });
+    return ride;
+  }
+
   create(createRideData: Partial<Ride>) {
     const driver = this.rideRepository.create(createRideData);
     return driver;

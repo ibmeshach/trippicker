@@ -22,7 +22,6 @@ export class ChatsService {
     const chatsMessages = await this.chatRepository.find({
       where: {
         userId,
-        rideId,
       },
       order: {
         createdAt: 'ASC',

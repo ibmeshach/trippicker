@@ -6,10 +6,12 @@ import { ChatsController } from './chats.controller';
 import { DriverService } from 'src/driver/driver.service';
 import { Driver } from 'src/entities/driver.entity';
 import { RedisConfigService } from 'src/config/redis.service';
+import { RideService } from 'src/ride/ride.service';
+import { Ride } from 'src/entities/rides.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ChatMessage, Driver])],
-  providers: [ChatsService, DriverService, RedisConfigService],
+  imports: [TypeOrmModule.forFeature([ChatMessage, Driver, Ride])],
+  providers: [ChatsService, DriverService, RedisConfigService, RideService],
   controllers: [ChatsController],
 })
 export class ChatsModule {}

@@ -10,6 +10,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { DriverService } from 'src/driver/driver.service';
 import { ChatsService } from './chats.service';
+import { RideService } from 'src/ride/ride.service';
 
 @Controller('chats')
 export class ChatsController {
@@ -17,15 +18,19 @@ export class ChatsController {
     private readonly configService: ConfigService,
     private readonly driverService: DriverService,
     private readonly chatsService: ChatsService,
+    private readonly rideService: RideService,
   ) {}
 
   @MessagePattern('driver.saveChatMessage')
   @UseInterceptors(ClassSerializerInterceptor)
   async saveChatMessage(@Payload() { data }: { data: SaveChatMessageProps }) {
     try {
+      const ride = await this.rideService.findRideByRideId(data.rideId);
+
       const createChatData = {
         owner: data.role === 'driver' ? true : false,
         rideId: data.rideId,
+        ride,
         content: data.content,
         driverId: data.driverId,
       };
