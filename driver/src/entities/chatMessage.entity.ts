@@ -8,7 +8,7 @@ export class ChatMessage extends BaseModel {
   @Column({ nullable: false })
   owner: boolean;
 
-  @Column({ nullable: false })
+  @Column({ unique: true, nullable: false })
   rideId: string;
 
   @Column({ nullable: false })

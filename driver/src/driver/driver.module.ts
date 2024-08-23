@@ -10,7 +10,6 @@ import { RideService } from 'src/ride/ride.service';
 import { Ride } from 'src/entities/rides.entity';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
-import { ChatsService } from 'src/chats/chats.service';
 import { ChatMessage } from 'src/entities/chatMessage.entity';
 
 @Module({
@@ -33,7 +32,6 @@ import { ChatMessage } from 'src/entities/chatMessage.entity';
     RedisConfigService,
     RideService,
     UserService,
-    ChatsService,
   ],
   controllers: [DriverController],
 })
