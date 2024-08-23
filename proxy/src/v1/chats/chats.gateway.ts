@@ -1,23 +1,14 @@
-import { Inject, OnModuleInit } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import {
-  ConnectedSocket,
-  MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { ClientProxy } from '@nestjs/microservices';
 import { Server, Socket } from 'socket.io';
-import { catchError, firstValueFrom } from 'rxjs';
-import { MapsService } from 'src/v1/maps/maps.service';
-import { RideService } from '../users/ride/ride.service';
-import { EventsService } from '../events/events.service';
-import { SaveChatMessageEvent } from '../chats/chat.events';
-import {
-  GetNearestDriversEvent,
-  UpdateDriverLocationEvent,
-  UpdateUserLocationEvent,
-} from '../gateway/gateway.events';
+import { catchError } from 'rxjs';
+import { SaveChatMessageEvent } from './chat.events';
 
 @WebSocketGateway({
   namespace: 'v1/events/chat',
@@ -28,77 +19,80 @@ import {
   },
   transports: ['websocket'],
 })
-export class ChatGateway {
-  private retryCounts: Map<string, number> = new Map();
+export class ChatGateway implements OnGatewayConnection {
+  @WebSocketServer() server: Server;
 
-  configService: any;
   constructor(
     @Inject('USERS') private readonly usersClient: ClientProxy,
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
-    private readonly mapsService: MapsService,
-    private readonly rideService: RideService,
-    private readonly eventsService: EventsService,
   ) {}
 
-  @WebSocketServer() server: Server;
+  handleConnection(client: Socket) {
+    const token = client.handshake.headers['authorization'];
 
-  @SubscribeMessage('user.updateLocation')
-  async userUpdateLocation(
-    @MessageBody() data: Partial<UpdateLocationsProps>,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const token = socket.handshake.headers['authorization'];
+    console.log(token);
+    const { role, rideId, userId, driverId } = client.handshake.query;
 
-    const observable = this.driversClient
+    const roomId = `${userId}:${driverId}`;
+
+    client.data = { token, role, rideId };
+    client.join(roomId);
+  }
+
+  @SubscribeMessage('message')
+  handleMessage(
+    client: Socket,
+    payload: { roomId: string; message: string },
+  ): void {
+    const { roomId, message } = payload;
+    const { token, role, rideId } = client.data;
+
+    console.log('get here first', payload);
+
+    // Ensure that the observables are subscribed to
+    this.driversClient
       .send(
         'driver.saveChatMessage',
-        new UpdateUserLocationEvent({
+        new SaveChatMessageEvent({
           token,
-          address: data.address,
-          currentLatitude: data.currentLatitude,
-          currentLongitude: data.currentLongitude,
+          role,
+          rideId: rideId,
+          content: message,
         }),
       )
       .pipe(
         catchError((error) => {
+          console.error('Error sending message to drivers service:', error);
           throw error;
         }),
-      );
+      )
+      .subscribe({
+        next: (response) => console.log('Driver service response:', response),
+        error: (error) => console.error('Driver service error:', error),
+      });
 
-    const value = await firstValueFrom(observable);
-
-    console.log(value);
-
-    return value;
-  }
-
-  requestRideResponse(payload: RequestRideGatewayProps): void {
-    this.server.emit(`user.rideRequestResponse:${payload.user.id}`, payload);
-  }
-
-  // driver
-
-  @SubscribeMessage('driver.updateLocation')
-  async driverUpdateLocation(
-    @MessageBody() data: Partial<UpdateLocationsProps>,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const token = socket.handshake.headers['authorization'];
-
-    return this.driversClient
+    this.usersClient
       .send(
-        'driver.updateLocation',
-        new UpdateDriverLocationEvent({
+        'user.saveChatMessage',
+        new SaveChatMessageEvent({
           token,
-          address: data.address,
-          currentLatitude: data.currentLatitude,
-          currentLongitude: data.currentLongitude,
+          role,
+          rideId: rideId,
+          content: message,
         }),
       )
       .pipe(
         catchError((error) => {
+          console.error('Error sending message to users service:', error);
           throw error;
         }),
-      );
+      )
+      .subscribe({
+        next: (response) => console.log('User service response:', response),
+        error: (error) => console.error('User service error:', error),
+      });
+
+    console.log('get here second and last');
+    this.server.to(roomId).emit('message', { message });
   }
 }
