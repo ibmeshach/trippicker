@@ -11,3 +11,8 @@ interface UserSaveChatMessageProps {
   rideId: string;
   content: string;
 }
+
+interface GetChatsProps {
+  id: string;
+  rideId: string;
+}
