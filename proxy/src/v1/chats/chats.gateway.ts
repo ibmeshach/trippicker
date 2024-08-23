@@ -31,20 +31,15 @@ export class ChatGateway implements OnGatewayConnection {
     const token = client.handshake.headers['authorization'];
 
     console.log(token);
-    const { role, rideId, userId, driverId } = client.handshake.query;
-
-    const roomId = `${userId}:${driverId}`;
+    const { role, rideId } = client.handshake.query;
 
     client.data = { token, role, rideId };
-    client.join(roomId);
+    client.join(rideId);
   }
 
   @SubscribeMessage('message')
-  handleMessage(
-    client: Socket,
-    payload: { roomId: string; message: string },
-  ): void {
-    const { roomId, message } = payload;
+  handleMessage(client: Socket, payload: { message: string }): void {
+    const { message } = payload;
     const { token, role, rideId } = client.data;
 
     console.log('get here first', payload);
@@ -93,6 +88,6 @@ export class ChatGateway implements OnGatewayConnection {
       });
 
     console.log('get here second and last');
-    this.server.to(roomId).emit('message', { message });
+    this.server.to(rideId).emit('message', { message });
   }
 }

@@ -222,9 +222,6 @@ export class GatewayService implements OnModuleInit {
   }
 
   private generateRideId(): string {
-    const timestamp = Date.now().toString(); // Get current timestamp
-    const randomValue = uuidv4(); // Generate a random UUID for additional uniqueness
-    const combined = `${timestamp}-${randomValue}`; // Combine the timestamp and UUID
-    return Buffer.from(combined).toString('base64'); // Convert the combined string to Base64
+    return uuidv4();
   }
 }
