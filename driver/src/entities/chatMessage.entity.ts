@@ -18,7 +18,6 @@ export class ChatMessage extends BaseModel {
   driverId: string;
 
   @OneToOne(() => Ride)
-  @JoinColumn()
   ride: Ride;
 
   @ManyToOne(() => Driver, (user) => user.chats)
