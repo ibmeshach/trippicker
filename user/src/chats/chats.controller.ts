@@ -24,22 +24,11 @@ export class ChatsController {
   @UseInterceptors(ClassSerializerInterceptor)
   async saveChatMessage(@Payload() { data }: { data: SaveChatMessageProps }) {
     try {
-      const secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
-      const payload = await this.userService.decodejwtToken(data.token, secret);
-
-      if (!payload)
-        throw new CustomException(
-          'Invalid or expired jwt token',
-          HttpStatus.BAD_REQUEST,
-        );
-
-      const userId = payload.sub;
-
       const createChatData = {
         owner: data.role === 'user' ? true : false,
         rideId: data.rideId,
         content: data.content,
-        userId: userId,
+        userId: data.userId,
       };
 
       const chatMessage = this.chatsService.create(createChatData);
@@ -74,7 +63,10 @@ export class ChatsController {
           HttpStatus.BAD_REQUEST,
         );
 
+      const userId = payload.sub;
+
       const chatMessages = await this.chatsService.getAllChatMessages(
+        userId,
         data.rideId,
       );
       return chatMessages;

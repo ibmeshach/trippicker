@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  Point,
-  JoinColumn,
-  OneToOne,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, OneToOne } from 'typeorm';
 import { Driver } from './driver.entity';
 import { BaseModel } from './base.entity';
 import { User } from './user.entity';

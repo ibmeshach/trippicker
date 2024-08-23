@@ -15,9 +15,13 @@ export class ChatsService {
     return user;
   }
 
-  async getAllChatMessages(rideId: string): Promise<ChatMessage[]> {
+  async getAllChatMessages(
+    userId: string,
+    rideId: string,
+  ): Promise<ChatMessage[]> {
     const chatsMessages = await this.chatRepository.find({
       where: {
+        userId,
         rideId,
       },
       order: {

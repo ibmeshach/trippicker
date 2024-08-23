@@ -18,7 +18,7 @@ export class ChatMessage extends BaseModel {
   userId: string;
 
   @OneToOne(() => Ride)
-  @JoinColumn({ name: 'rideId' })
+  @JoinColumn({ name: 'rideId', referencedColumnName: 'rideId' })
   ride: Ride;
 
   @ManyToOne(() => User, (user) => user.chats)

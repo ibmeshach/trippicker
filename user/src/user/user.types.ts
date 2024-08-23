@@ -47,4 +47,5 @@ interface SaveChatMessageProps {
   token: string;
   rideId: string;
   content: string;
+  userId: string;
 }

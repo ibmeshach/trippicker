@@ -8,7 +8,7 @@ export class ChatMessage extends BaseModel {
   @Column({ nullable: false })
   owner: boolean;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ nullable: false })
   rideId: string;
 
   @Column({ nullable: false })
@@ -18,7 +18,7 @@ export class ChatMessage extends BaseModel {
   driverId: string;
 
   @OneToOne(() => Ride)
-  @JoinColumn({ name: 'rideId' })
+  @JoinColumn({ name: 'rideId', referencedColumnName: 'rideId' })
   ride: Ride;
 
   @ManyToOne(() => Driver, (user) => user.chats)
