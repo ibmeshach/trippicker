@@ -8,7 +8,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { catchError } from 'rxjs';
-import { SaveChatMessageEvent } from './chat.events';
+import {
+  DriverSaveChatMessageEvent,
+  UserSaveChatMessageEvent,
+} from './chat.events';
 
 @WebSocketGateway({
   namespace: 'v1/events/chat',
@@ -31,16 +34,16 @@ export class ChatGateway implements OnGatewayConnection {
     const token = client.handshake.headers['authorization'];
 
     console.log(token);
-    const { role, rideId } = client.handshake.query;
+    const { role, rideId, driverId, userId } = client.handshake.query;
 
-    client.data = { token, role, rideId };
+    client.data = { role, rideId, userId, driverId };
     client.join(rideId);
   }
 
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: { message: string }): void {
     const { message } = payload;
-    const { token, role, rideId } = client.data;
+    const { driverId, userId, role, rideId } = client.data;
 
     console.log('get here first', payload);
 
@@ -48,10 +51,10 @@ export class ChatGateway implements OnGatewayConnection {
     this.driversClient
       .send(
         'driver.saveChatMessage',
-        new SaveChatMessageEvent({
-          token,
+        new DriverSaveChatMessageEvent({
+          driverId,
           role,
-          rideId: rideId,
+          rideId,
           content: message,
         }),
       )
@@ -69,10 +72,10 @@ export class ChatGateway implements OnGatewayConnection {
     this.usersClient
       .send(
         'user.saveChatMessage',
-        new SaveChatMessageEvent({
-          token,
+        new UserSaveChatMessageEvent({
+          userId,
           role,
-          rideId: rideId,
+          rideId,
           content: message,
         }),
       )

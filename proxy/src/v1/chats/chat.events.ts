@@ -1,3 +1,7 @@
-export class SaveChatMessageEvent {
-  constructor(public readonly data: SaveChatMessageProps) {}
+export class UserSaveChatMessageEvent {
+  constructor(public readonly data: UserSaveChatMessageProps) {}
+}
+
+export class DriverSaveChatMessageEvent {
+  constructor(public readonly data: DriverSaveChatMessageProps) {}
 }
