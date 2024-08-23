@@ -21,8 +21,8 @@ export class ChatsService {
   ): Promise<ChatMessage[]> {
     const chatsMessages = await this.chatRepository.find({
       where: {
-        driverId,
         rideKey: rideId,
+        driverId,
       },
       order: {
         createdAt: 'ASC',
