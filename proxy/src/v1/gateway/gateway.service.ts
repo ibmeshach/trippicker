@@ -18,6 +18,7 @@ import {
 import { MapsService } from 'src/v1/maps/maps.service';
 import { RideService } from '../users/ride/ride.service';
 import { EventsService } from '../events/events.service';
+import { SaveChatMessageEvent } from '../chats/chat.events';
 
 @WebSocketGateway({
   namespace: 'v1/events',
@@ -150,27 +151,15 @@ export class GatewayService implements OnModuleInit {
       );
   }
 
-  // @SubscribeMessage('driver.test')
-  // async test(
-  //   @MessageBody() data: Partial<UpdateLocationsProps>,
-  //   @ConnectedSocket() socket: Socket,
-  // ) {
-  //   this.driversClient
-  //     .send(
-  //       'driver.saveChatMessage',
-  //       new SaveChatMessageEvent({
-  //         token,
-  //         role,
-  //         rideId: roomId,
-  //         content: message,
-  //       }),
-  //     )
-  //     .pipe(
-  //       catchError((error) => {
-  //         throw error;
-  //       }),
-  //     );
-  // }
+  @SubscribeMessage('driver.test')
+  async test(@ConnectedSocket() socket: Socket) {
+    console.log('get here');
+    this.driversClient.send('driver.acceptedRide', { data: 'test' }).pipe(
+      catchError((error) => {
+        throw error;
+      }),
+    );
+  }
 
   @SubscribeMessage('driver.driverRideResponse')
   async driverRideResponse(@MessageBody() data: DriverRideResponseProps) {

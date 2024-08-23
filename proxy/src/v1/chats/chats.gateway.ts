@@ -1,14 +1,23 @@
-import { Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, OnModuleInit } from '@nestjs/common';
 import {
-  OnGatewayConnection,
+  ConnectedSocket,
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { ClientProxy } from '@nestjs/microservices';
 import { Server, Socket } from 'socket.io';
-import { catchError } from 'rxjs';
-import { SaveChatMessageEvent } from './chat.events';
+import { catchError, firstValueFrom } from 'rxjs';
+import { MapsService } from 'src/v1/maps/maps.service';
+import { RideService } from '../users/ride/ride.service';
+import { EventsService } from '../events/events.service';
+import { SaveChatMessageEvent } from '../chats/chat.events';
+import {
+  GetNearestDriversEvent,
+  UpdateDriverLocationEvent,
+  UpdateUserLocationEvent,
+} from '../gateway/gateway.events';
 
 @WebSocketGateway({
   namespace: 'v1/events/chat',
@@ -19,37 +28,35 @@ import { SaveChatMessageEvent } from './chat.events';
   },
   transports: ['websocket'],
 })
-export class ChatGateway implements OnGatewayConnection {
-  @WebSocketServer() server: Server;
+export class ChatGateway {
+  private retryCounts: Map<string, number> = new Map();
 
+  configService: any;
   constructor(
     @Inject('USERS') private readonly usersClient: ClientProxy,
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
+    private readonly mapsService: MapsService,
+    private readonly rideService: RideService,
+    private readonly eventsService: EventsService,
   ) {}
 
-  handleConnection(client: Socket) {
-    const { token, role, roomId } = client.handshake.query;
-    client.data = { token, role };
-    client.join(roomId);
-  }
+  @WebSocketServer() server: Server;
 
-  @SubscribeMessage('message')
-  handleMessage(
-    client: Socket,
-    payload: { roomId: string; message: string },
-  ): void {
-    const { roomId, message } = payload;
-    const { token, role } = client.data;
+  @SubscribeMessage('user.updateLocation')
+  async userUpdateLocation(
+    @MessageBody() data: Partial<UpdateLocationsProps>,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const token = socket.handshake.headers['authorization'];
 
-    console.log('get here first', payload);
-    this.driversClient
+    const observable = this.driversClient
       .send(
         'driver.saveChatMessage',
-        new SaveChatMessageEvent({
+        new UpdateUserLocationEvent({
           token,
-          role,
-          rideId: roomId,
-          content: message,
+          address: data.address,
+          currentLatitude: data.currentLatitude,
+          currentLongitude: data.currentLongitude,
         }),
       )
       .pipe(
@@ -58,14 +65,34 @@ export class ChatGateway implements OnGatewayConnection {
         }),
       );
 
-    this.usersClient
+    const value = await firstValueFrom(observable);
+
+    console.log(value);
+
+    return value;
+  }
+
+  requestRideResponse(payload: RequestRideGatewayProps): void {
+    this.server.emit(`user.rideRequestResponse:${payload.user.id}`, payload);
+  }
+
+  // driver
+
+  @SubscribeMessage('driver.updateLocation')
+  async driverUpdateLocation(
+    @MessageBody() data: Partial<UpdateLocationsProps>,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const token = socket.handshake.headers['authorization'];
+
+    return this.driversClient
       .send(
-        'user.saveChatMessage',
-        new SaveChatMessageEvent({
+        'driver.updateLocation',
+        new UpdateDriverLocationEvent({
           token,
-          role,
-          rideId: roomId,
-          content: message,
+          address: data.address,
+          currentLatitude: data.currentLatitude,
+          currentLongitude: data.currentLongitude,
         }),
       )
       .pipe(
@@ -73,8 +100,5 @@ export class ChatGateway implements OnGatewayConnection {
           throw error;
         }),
       );
-
-    console.log('get here second and last');
-    this.server.to(roomId).emit('message', { message });
   }
 }
