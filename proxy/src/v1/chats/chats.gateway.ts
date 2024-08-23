@@ -94,11 +94,8 @@ export class ChatGateway implements OnGatewayConnection {
 
       console.log('get here second and last');
 
-      if (role === 'driver') {
-        this.server.to(rideId).emit(`message:${driverId}`, driverChat);
-      } else if (role === 'user') {
-        this.server.to(rideId).emit(`message:${userId}`, userChat);
-      }
+      this.server.to(rideId).emit(`message:${driverId}`, driverChat);
+      this.server.to(rideId).emit(`message:${userId}`, userChat);
     } catch (error) {
       console.error('Error processing chat message:', error);
       // Optionally, you can notify the client of the error

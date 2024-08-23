@@ -68,13 +68,7 @@ export class ChatsController {
         data.rideId,
       );
 
-      const serializedMessages = chatMessages.map((chatMessage) =>
-        plainToClass(ChatMessageEntity, chatMessage, {
-          excludeExtraneousValues: true,
-        }),
-      );
-
-      return serializedMessages;
+      return chatMessages;
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {
