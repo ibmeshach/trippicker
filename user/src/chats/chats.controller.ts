@@ -11,6 +11,8 @@ import { CustomException } from 'src/custom.exception';
 import { UserService } from 'src/user/user.service';
 import { ChatsService } from './chats.service';
 import { RideService } from 'src/ride/ride.service';
+import { ChatMessageEntity } from './serializers/chatMessage.serializer';
+import { plainToClass } from 'class-transformer';
 
 @Controller('chats')
 export class ChatsController {
@@ -39,7 +41,9 @@ export class ChatsController {
       const chatMessage = this.chatsService.create(createChatData);
 
       await chatMessage.save();
-      return true;
+
+      const chatMessageResponse = new ChatMessageEntity(chatMessage);
+      return chatMessageResponse;
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {
@@ -56,25 +60,21 @@ export class ChatsController {
   @MessagePattern('user.getAllChatMessages')
   @UseInterceptors(ClassSerializerInterceptor)
   async getAllChatMessages(
-    @Payload() { data }: { data: { token: string; rideId: string } },
+    @Payload() { data }: { data: { id: string; rideId: string } },
   ) {
     try {
-      const secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
-      const payload = await this.userService.decodejwtToken(data.token, secret);
-
-      if (!payload)
-        throw new CustomException(
-          'Invalid or expired jwt token',
-          HttpStatus.BAD_REQUEST,
-        );
-
-      const userId = payload.sub;
-
       const chatMessages = await this.chatsService.getAllChatMessages(
-        userId,
+        data.id,
         data.rideId,
       );
-      return chatMessages;
+
+      const serializedMessages = chatMessages.map((chatMessage) =>
+        plainToClass(ChatMessageEntity, chatMessage, {
+          excludeExtraneousValues: true,
+        }),
+      );
+
+      return serializedMessages;
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {
