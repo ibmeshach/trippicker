@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { Driver } from './driver.entity';
 import { BaseModel } from './base.entity';
 import { User } from './user.entity';
@@ -45,13 +45,23 @@ export class Ride extends BaseModel {
   @OneToOne(() => ChatMessage, (chatMessage) => chatMessage.ride)
   chatMessage: ChatMessage;
 
-  @ManyToOne(() => User, (user) => user.rides, {
-    nullable: true,
+  @Column({ nullable: false })
+  userPhoneNumber: string;
+
+  @Column({ nullable: false })
+  driverPhoneNumber: string;
+
+  @ManyToOne(() => User, (user) => user.rides)
+  @JoinColumn({
+    name: 'userPhoneNumber',
+    referencedColumnName: 'phoneNumber',
   })
   user: User;
 
-  @ManyToOne(() => Driver, (driver) => driver.rides, {
-    nullable: true,
+  @ManyToOne(() => Driver, (driver) => driver.rides)
+  @JoinColumn({
+    name: 'driverPhoneNumber',
+    referencedColumnName: 'phoneNumber',
   })
   driver: Driver;
 }

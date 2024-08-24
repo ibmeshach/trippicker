@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { Driver } from './driver.entity';
@@ -10,6 +10,7 @@ export class User extends BaseModel {
   fullName: string;
 
   @Column({ unique: true, nullable: false })
+  @Index()
   phoneNumber: string;
 
   @Column({ default: false })

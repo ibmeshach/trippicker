@@ -68,22 +68,22 @@ export class DriverService {
     otpToken: string;
   }): Promise<Driver> {
     const { phoneNumber, otpToken } = updateOptions;
-    const user = await this.driverRepository.findOne({
+    const driver = await this.driverRepository.findOne({
       where: { phoneNumber },
     });
-    if (!user) {
+    if (!driver) {
       throw new CustomException(
-        `User with phone number ${phoneNumber} not found`,
+        `Driver with phone number ${phoneNumber} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
-    user.otpToken = otpToken;
-    await this.driverRepository.save(user);
-    return user;
+    driver.otpToken = otpToken;
+    await this.driverRepository.save(driver);
+    return driver;
   }
 
   async update(userId: string, updateOptions: Partial<Driver>) {
-    return await this.driverRepository.update(
+    await this.driverRepository.update(
       {
         id: userId,
       },

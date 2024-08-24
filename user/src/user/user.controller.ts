@@ -121,11 +121,11 @@ export class UserController {
 
       delete data.driver.id;
       if (!driver) {
-        // Create a new user if it does not exist
+        // Create a new driver if it does not exist
         driver = this.queryRunner.manager.create(Driver, data.driver);
         await this.queryRunner.manager.save(driver);
       } else {
-        // Update the existing user if needed
+        // Update the existing driver if needed
         await this.queryRunner.manager.update(
           Driver,
           { phoneNumber: data.user.phoneNumber },
@@ -137,10 +137,10 @@ export class UserController {
 
       const createRideData = {
         ...data,
+        userPhoneNumber: user.phoneNumber,
+        driverPhoneNumber: driver.phoneNumber,
         duration: data.duration.toString(),
         distance: data.range,
-        user: user,
-        driver: driver,
       };
 
       const ride = this.queryRunner.manager.create(Ride, createRideData);
@@ -169,9 +169,20 @@ export class UserController {
     try {
       const ride: Ride = await this.rideService.findRideByRideId(data.rideId);
 
-      const user = new UserEntity(ride.user);
+      const user = await this.userService.findUserByPhoneNumber(
+        ride.userPhoneNumber,
+      );
 
-      return user;
+      if (!user)
+        throw new CustomException(
+          'Enter a valid rideId',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      return {
+        lat: user.currentLatitude,
+        lng: user.currentLongitude,
+      };
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;

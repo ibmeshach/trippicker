@@ -143,7 +143,6 @@ export class DriverController {
     await this.queryRunner.connect();
     await this.queryRunner.startTransaction();
 
-    console.log('data', data);
     try {
       if (!data.action)
         throw new CustomException(
@@ -174,10 +173,10 @@ export class DriverController {
 
       const createRideData = {
         ...data,
+        userPhoneNumber: user.phoneNumber,
+        driverPhoneNumber: driver.phoneNumber,
         duration: data.duration.toString(),
         distance: data.range,
-        user: user,
-        driver: driver,
       };
 
       const ride = this.queryRunner.manager.create(Ride, createRideData);
@@ -206,10 +205,22 @@ export class DriverController {
     try {
       const ride: Ride = await this.rideService.findRideByRideId(data.rideId);
 
-      const driver = new DriverEntity(ride.driver);
+      const driver = await this.driverService.findDriverByPhoneNumber(
+        ride.driverPhoneNumber,
+      );
 
-      return driver;
+      if (!driver)
+        throw new CustomException(
+          'Enter a valid rideId',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      return {
+        lat: driver.currentLatitude,
+        lng: driver.currentLongitude,
+      };
     } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {

@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { catchError, firstValueFrom } from 'rxjs';
 import {
   BookRideEvent,
+  GetCurrentLocationEvent,
   GetNearestDriversEvent,
   UpdateDriverLocationEvent,
   UpdateUserLocationEvent,
@@ -48,13 +49,49 @@ export class GatewayService implements OnModuleInit {
   }
   @WebSocketServer() server: Server;
 
+  @SubscribeMessage('trackRide')
+  async trackRide(@MessageBody() data: { rideId: string }) {
+    const observableDriverLocation = this.driversClient
+      .send(
+        'driver.getCurrentLocation',
+        new GetCurrentLocationEvent({
+          rideId: data.rideId,
+        }),
+      )
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+
+    const observableUserLocation = this.usersClient
+      .send(
+        'user.getCurrentLocation',
+        new GetCurrentLocationEvent({
+          rideId: data.rideId,
+        }),
+      )
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+
+    const driverLocation = await firstValueFrom(observableDriverLocation);
+    const userLocation = await firstValueFrom(observableUserLocation);
+
+    this.server.emit(`trackRide:${data.rideId}`, {
+      driverLocation,
+      userLocation,
+    });
+  }
+
   @SubscribeMessage('user.updateLocation')
   async userUpdateLocation(
     @MessageBody() data: Partial<UpdateLocationsProps>,
     @ConnectedSocket() socket: Socket,
   ) {
     const token = socket.handshake.headers['authorization'];
-    console.log(token, 'token');
 
     const observable = this.usersClient
       .send(
@@ -149,16 +186,6 @@ export class GatewayService implements OnModuleInit {
           throw error;
         }),
       );
-  }
-
-  @SubscribeMessage('driver.test')
-  async test(@ConnectedSocket() socket: Socket) {
-    console.log('get here');
-    this.driversClient.send('driver.acceptedRide', { data: 'test' }).pipe(
-      catchError((error) => {
-        throw error;
-      }),
-    );
   }
 
   @SubscribeMessage('driver.driverRideResponse')
