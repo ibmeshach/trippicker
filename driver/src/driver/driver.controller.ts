@@ -15,6 +15,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { DriverEntity } from './serializers/driver.serializer';
 import { UserService } from 'src/user/user.service';
 import { DataSource, QueryRunner } from 'typeorm';
+
 import { User } from 'src/entities/user.entity';
 import { Ride } from 'src/entities/rides.entity';
 import { RideService } from 'src/ride/ride.service';
