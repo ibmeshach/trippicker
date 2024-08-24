@@ -17,7 +17,7 @@ import { Ride } from 'src/entities/rides.entity';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'users-nestjs-backend.railway.internal',
+          // host: 'users-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

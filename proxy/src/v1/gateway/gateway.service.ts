@@ -50,18 +50,14 @@ export class GatewayService implements OnModuleInit {
   @WebSocketServer() server: Server;
 
   @SubscribeMessage('trackRide')
-  async trackRide(@ConnectedSocket() socket: Socket) {
-    let { rideId } = socket.handshake.query;
-
-    if (Array.isArray(rideId)) {
-      rideId = rideId[0]; // or handle the array as needed
-    }
+  async trackRide(@MessageBody() data: { rideId: string }) {
+    console.log(data.rideId);
 
     const observableDriverLocation = this.driversClient
       .send(
         'driver.getCurrentLocation',
         new GetCurrentLocationEvent({
-          rideId: rideId as string,
+          rideId: data.rideId,
         }),
       )
       .pipe(
@@ -74,7 +70,7 @@ export class GatewayService implements OnModuleInit {
       .send(
         'user.getCurrentLocation',
         new GetCurrentLocationEvent({
-          rideId: rideId as string,
+          rideId: data.rideId,
         }),
       )
       .pipe(
@@ -86,7 +82,7 @@ export class GatewayService implements OnModuleInit {
     const driverLocation = await firstValueFrom(observableDriverLocation);
     const userLocation = await firstValueFrom(observableUserLocation);
 
-    this.server.emit(`trackRide:${rideId}`, {
+    this.server.emit(`trackRide:${data.rideId}`, {
       driverLocation,
       userLocation,
     });

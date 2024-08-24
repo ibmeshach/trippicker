@@ -58,7 +58,7 @@ import { TwilioModule } from 'nestjs-twilio';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
