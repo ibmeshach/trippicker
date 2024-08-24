@@ -13,12 +13,11 @@ import { CustomException } from 'src/custom.exception';
 import { GetUserEvent } from './driver.events';
 import { catchError, firstValueFrom } from 'rxjs';
 import { DriverEntity } from './serializers/driver.serializer';
-import { RideService } from 'src/ride/ride.service';
 import { UserService } from 'src/user/user.service';
 import { DataSource, QueryRunner } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { Ride } from 'src/entities/rides.entity';
-import { ChatsService } from 'src/chats/chats.service';
+import { RideService } from 'src/ride/ride.service';
 
 @Controller('driver')
 export class DriverController {
@@ -29,6 +28,7 @@ export class DriverController {
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly rideService: RideService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
@@ -40,7 +40,6 @@ export class DriverController {
     @Payload() { data }: { data: LocationEventPayloadProps },
   ) {
     try {
-      console.log('get here');
       const secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
       const payload = await this.driverService.decodejwtToken(
         data.token,
@@ -65,8 +64,6 @@ export class DriverController {
         driverId,
         driverCurrentLocationData,
       );
-
-      console.log(driverCurrentLocationData);
 
       return driverCurrentLocationData;
     } catch (err) {
@@ -191,6 +188,27 @@ export class DriverController {
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
       console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.getCurrentLocation')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async getCurrentLocation(@Payload() { data }: { data: { rideId: string } }) {
+    try {
+      const ride: Ride = await this.rideService.findRideByRideId(data.rideId);
+
+      const driver = new DriverEntity(ride.driver);
+
+      return driver;
+    } catch (err) {
       if (err instanceof CustomException) {
         throw err;
       } else {

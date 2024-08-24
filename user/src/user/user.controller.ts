@@ -28,6 +28,7 @@ export class UserController {
     private dataSource: DataSource,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly rideService: RideService,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
   }
@@ -151,6 +152,27 @@ export class UserController {
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
       console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.getCurrentLocation')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async getCurrentLocation(@Payload() { data }: { data: { rideId: string } }) {
+    try {
+      const ride: Ride = await this.rideService.findRideByRideId(data.rideId);
+
+      const user = new UserEntity(ride.user);
+
+      return user;
+    } catch (err) {
       if (err instanceof CustomException) {
         throw err;
       } else {
