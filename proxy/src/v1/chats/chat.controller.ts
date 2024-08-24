@@ -3,7 +3,7 @@ import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ChatService } from './chat.service';
 
-@ApiTags('ride')
+@ApiTags('chat')
 @Controller('v1/chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}

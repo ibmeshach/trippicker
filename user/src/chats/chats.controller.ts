@@ -63,10 +63,14 @@ export class ChatsController {
     @Payload() { data }: { data: { id: string; rideId: string } },
   ) {
     try {
+      console.log('before', data);
+
       const chatMessages = await this.chatsService.getAllChatMessages(
         data.id,
         data.rideId,
       );
+
+      console.log('after', chatMessages);
 
       return chatMessages;
     } catch (err) {

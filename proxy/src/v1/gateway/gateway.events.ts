@@ -13,3 +13,7 @@ export class UpdateDriverLocationEvent {
 export class BookRideEvent {
   constructor(public readonly data: DriverRideResponseFinalProps) {}
 }
+
+export class GetCurrentLocationEvent {
+  constructor(public readonly data: GetCurrentLocationProps) {}
+}

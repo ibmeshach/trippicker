@@ -15,7 +15,7 @@ export class ChatMessage extends BaseModel {
   @Column({ nullable: false })
   owner: boolean;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ nullable: false })
   @Index()
   rideKey: string;
 

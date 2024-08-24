@@ -26,7 +26,7 @@ import { ChatsModule } from './v1/chats/chats.module';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          // host: 'users-nestjs-backend.railway.internal',
+          host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
@@ -34,7 +34,7 @@ import { ChatsModule } from './v1/chats/chats.module';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
