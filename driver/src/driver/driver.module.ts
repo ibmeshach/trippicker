@@ -11,6 +11,7 @@ import { Ride } from 'src/entities/rides.entity';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
 import { ChatMessage } from 'src/entities/chatMessage.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ChatMessage } from 'src/entities/chatMessage.entity';
         },
       },
     ]),
+    HttpModule,
   ],
   providers: [
     DriverService,

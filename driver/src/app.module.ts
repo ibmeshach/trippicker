@@ -10,7 +10,6 @@ import { ConfigDatabaseService } from './config/config.service';
 import { DataSource } from 'typeorm';
 import { DriverModule } from './driver/driver.module';
 import { SmsModule } from './sms/sms.module';
-import { RedisConfigService } from './config/redis.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './user/user.module';
 import { ChatsModule } from './chats/chats.module';
@@ -32,6 +31,8 @@ import { WalletModule } from './wallet/wallet.module';
         OTP_JWT_TOKEN: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
         REDIS_URL: Joi.string().required(),
+        TERMII_BASE_URL: Joi.string().required(),
+        TERMII_API_KEY: Joi.string().required(),
       }),
     }),
 
