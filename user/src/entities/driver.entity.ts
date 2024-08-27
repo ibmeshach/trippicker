@@ -14,6 +14,9 @@ export class Driver extends BaseModel {
   @Column({ unique: true, nullable: false })
   phoneNumber: string;
 
+  @Column({ nullable: true })
+  bio?: string;
+
   @Column()
   licenseNumber: string;
 
@@ -42,7 +45,7 @@ export class Driver extends BaseModel {
   isOnline: boolean;
 
   @Column({ nullable: true })
-  rating: number;
+  rating?: number;
 
   @Column({ default: 0 })
   numberOfRides: number;

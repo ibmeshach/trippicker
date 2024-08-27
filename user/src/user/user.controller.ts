@@ -19,6 +19,7 @@ import { DataSource, QueryRunner } from 'typeorm';
 import { Driver } from 'src/entities/driver.entity';
 import { Ride } from 'src/entities/rides.entity';
 import { ChatsService } from 'src/chats/chats.service';
+import { DriverService } from 'src/driver/driver.service';
 
 @Controller('user')
 export class UserController {
@@ -28,7 +29,7 @@ export class UserController {
     private dataSource: DataSource,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
-    private readonly rideService: RideService,
+    private readonly driverService: DriverService,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
   }
@@ -163,27 +164,45 @@ export class UserController {
     }
   }
 
-  @MessagePattern('user.getCurrentLocation')
-  @UseInterceptors(ClassSerializerInterceptor)
-  async getCurrentLocation(@Payload() { data }: { data: { rideId: string } }) {
+  @MessagePattern('user.rateUser')
+  async getAllChatMessages(
+    @Payload() { data }: { data: { rating: number; userId: string } },
+  ) {
     try {
-      const ride: Ride = await this.rideService.findRideByRideId(data.rideId);
-
-      const user = await this.userService.findUserByPhoneNumber(
-        ride.userPhoneNumber,
-      );
+      const user = await this.userService.findUserById(data.userId);
 
       if (!user)
-        throw new CustomException(
-          'Enter a valid rideId',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new CustomException('Enter a valid userId', HttpStatus.NOT_FOUND);
 
-      return {
-        lat: user.currentLatitude,
-        lng: user.currentLongitude,
-      };
+      const oldRating = user.rating;
+
+      const averageRating = (oldRating + data.rating) / (user.noOfRating + 1);
+      user.rating = averageRating;
+      user.noOfRating += 1;
+      await user.save();
+
+      return { status: true };
     } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.editProfile')
+  async editProfile(@Payload() { data }: { data: EditUserProfile }) {
+    try {
+      await this.userService.update(data.userId, data);
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {

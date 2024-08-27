@@ -2,6 +2,8 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CustomException } from 'src/custom.exception';
+import { User } from 'src/entities/user.entity';
+import { Wallet } from 'src/entities/wallet.entity';
 import { SmsService } from 'src/sms/sms.service';
 import { UserEntity } from 'src/user/serializers/user.serializer';
 import { UserService } from 'src/user/user.service';
@@ -35,18 +37,20 @@ export class AuthService {
         throw new CustomException('User already exists', HttpStatus.FORBIDDEN);
       }
 
-      const createdUser = this.userService.create(body);
+      const createdUser = this.queryRunner.manager.create(User, body);
+
+      const userWallet = this.queryRunner.manager.create(Wallet, {
+        userId: createdUser.id,
+      });
 
       const otpCode = this.smsService.generateOTP(4);
       const token = await this.encodeOptCodeInToken(createdUser.id, otpCode);
 
       createdUser.otpToken = token;
-      const newUser = await this.queryRunner.manager.save(createdUser);
-
-      const userResponse = new UserEntity(newUser);
+      await this.queryRunner.manager.save(createdUser);
+      await this.queryRunner.manager.save(userWallet);
 
       await this.queryRunner.commitTransaction();
-      return { user: userResponse, otpCode };
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
       throw err;
@@ -144,6 +148,10 @@ export class AuthService {
 
     if (updatedUser) return { otpCode };
   }
+
+  async verifyEmailOtpCode(data: VerifyEmailOtpCodeProps) {}
+
+  async sendEmailOtp(data: sendEmailOtpCodeProps) {}
 
   async generateToken(payload: {}, secret: string, expire_time: string | null) {
     const options: { secret: string; expiresIn?: string } = { secret };
