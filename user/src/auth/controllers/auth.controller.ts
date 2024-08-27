@@ -54,7 +54,7 @@ export class AuthController {
   }
 
   @MessagePattern('user.verifyOtp')
-  async verifyOtpCode(@Payload() { data }: { data: VerifyOtpCodeProps }) {
+  async verifyOTPCode(@Payload() { data }: { data: VerifyOtpCodeProps }) {
     try {
       return await this.authService.verifyOtpCode(data);
     } catch (err) {
@@ -71,9 +71,44 @@ export class AuthController {
   }
 
   @MessagePattern('user.resendOtp')
-  async resendOtp(@Payload() { data }: { data: ResendOtpCodeProps }) {
+  async resendOTP(@Payload() { data }: { data: ResendOtpCodeProps }) {
     try {
       return await this.authService.resendOtpCode(data);
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.verifyEmailOTP')
+  async verifyEmailOtp(@Payload() { data }: { data: VerifyEmailOtpCodeProps }) {
+    try {
+      return await this.authService.verifyEmailOtpCode(data);
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        console.log('error', err);
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.sendEmailOTP')
+  async sendVerifyEmailOtp(
+    @Payload() { data }: { data: sendEmailOtpCodeProps },
+  ) {
+    try {
+      return await this.authService.sendEmailOtp(data);
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;

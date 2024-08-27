@@ -29,7 +29,6 @@ export class DriverController {
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
-    private readonly rideService: RideService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
@@ -199,26 +198,46 @@ export class DriverController {
     }
   }
 
-  @MessagePattern('driver.getCurrentLocation')
-  @UseInterceptors(ClassSerializerInterceptor)
-  async getCurrentLocation(@Payload() { data }: { data: { rideId: string } }) {
+  @MessagePattern('driver.rateDriver')
+  async getAllChatMessages(
+    @Payload() { data }: { data: { rating: number; driverId: string } },
+  ) {
     try {
-      const ride: Ride = await this.rideService.findRideByRideId(data.rideId);
-
-      const driver = await this.driverService.findDriverByPhoneNumber(
-        ride.driverPhoneNumber,
-      );
+      const driver = await this.driverService.findDriverById(data.driverId);
 
       if (!driver)
         throw new CustomException(
-          'Enter a valid rideId',
-          HttpStatus.BAD_REQUEST,
+          'Enter a valid driverId',
+          HttpStatus.NOT_FOUND,
         );
 
-      return {
-        lat: driver.currentLatitude,
-        lng: driver.currentLongitude,
-      };
+      const oldRating = driver.rating;
+
+      const averageRating = (oldRating + data.rating) / (driver.noOfRating + 1);
+      driver.rating = averageRating;
+      driver.noOfRating += 1;
+      await driver.save();
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.editProfile')
+  async editProfile(@Payload() { data }: { data: EditDriverProfile }) {
+    try {
+      await this.driverService.update(data.userId, data);
+
+      return { status: true };
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {

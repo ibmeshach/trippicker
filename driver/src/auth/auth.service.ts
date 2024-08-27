@@ -4,7 +4,10 @@ import { JwtService } from '@nestjs/jwt';
 import { CustomException } from 'src/custom.exception';
 import { DriverService } from 'src/driver/driver.service';
 import { DriverEntity } from 'src/driver/serializers/driver.serializer';
+import { Driver } from 'src/entities/driver.entity';
+import { Wallet } from 'src/entities/wallet.entity';
 import { SmsService } from 'src/sms/sms.service';
+import { WalletService } from 'src/wallet/wallet.service';
 
 import { DataSource, QueryRunner } from 'typeorm';
 
@@ -13,11 +16,12 @@ export class AuthService {
   private queryRunner: QueryRunner;
 
   constructor(
-    private dataSource: DataSource,
+    private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
-    private jwtService: JwtService,
-    private driverService: DriverService,
-    private smsService: SmsService,
+    private readonly jwtService: JwtService,
+    private readonly driverService: DriverService,
+    private readonly smsService: SmsService,
+    private readonly walletService: WalletService,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
   }
@@ -36,13 +40,18 @@ export class AuthService {
         throw new CustomException('User already exists', HttpStatus.FORBIDDEN);
       }
 
-      const createdDriver = this.driverService.create(body);
+      const createdDriver = this.queryRunner.manager.create(Driver, body);
+
+      const driverWallet = this.queryRunner.manager.create(Wallet, {
+        driverId: createdDriver.id,
+      });
 
       const otpCode = await this.smsService.sendOtp(driver.phoneNumber);
       const token = await this.encodeOptCodeInToken(createdDriver.id, otpCode);
 
       createdDriver.otpToken = token;
-      const driverResponse = await this.queryRunner.manager.save(createdDriver);
+      await this.queryRunner.manager.save(createdDriver);
+      await this.queryRunner.manager.save(driverWallet);
 
       await this.queryRunner.commitTransaction();
       return 'created successfully';

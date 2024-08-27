@@ -49,3 +49,11 @@ interface SaveChatMessageProps {
   content: string;
   userId: string;
 }
+
+interface EditUserProfile {
+  userId: string;
+  fullname?: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+}

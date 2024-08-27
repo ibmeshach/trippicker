@@ -1,8 +1,9 @@
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany, OneToOne } from 'typeorm';
 import { BaseModel } from './base.entity';
 import { Ride } from './rides.entity';
 import { Driver } from './driver.entity';
 import { ChatMessage } from './chatMessage.entity';
+import { Wallet } from './wallet.entity';
 
 @Entity('User')
 export class User extends BaseModel {
@@ -12,6 +13,9 @@ export class User extends BaseModel {
   @Column({ unique: true, nullable: false })
   @Index()
   phoneNumber: string;
+
+  @Column({ nullable: true })
+  bio?: string;
 
   @Column({ default: false })
   isPhoneNumberConfirmed: boolean;
@@ -25,14 +29,29 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   address?: string;
 
+  @Column({ nullable: true, default: 0 }) // rating can be between  1 and  5
+  rating?: number;
+
+  @Column({ nullable: false, default: 0 })
+  noOfRating: number; // the no of drivers that have rated this user
+
   @Column({ nullable: true })
   profileImage?: string;
+
+  @Column({ nullable: true })
+  currentAddress?: string;
 
   @Column({ type: 'float', nullable: true })
   currentLatitude: number;
 
   @Column({ type: 'float', nullable: true })
   currentLongitude: number;
+
+  @Column({ type: 'float', nullable: false, default: 0.0 })
+  coinMined: number;
+
+  @OneToOne(() => Wallet)
+  coinWallet: Wallet;
 
   @OneToMany(() => Ride, (ride) => ride.user, {
     onDelete: 'CASCADE',

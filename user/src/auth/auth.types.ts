@@ -13,6 +13,15 @@ interface VerifyOtpCodeProps {
   otpCode: string;
 }
 
+interface VerifyEmailOtpCodeProps {
+  email: string;
+  otpCode: string;
+}
+
 interface ResendOtpCodeProps {
   phoneNumber: string;
+}
+
+interface sendEmailOtpCodeProps {
+  email: string;
 }

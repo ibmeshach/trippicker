@@ -10,7 +10,7 @@ export class Ride extends BaseModel {
   rideId: string;
 
   @Column({ default: 'booked' })
-  status: string;
+  status: 'booked' | 'arrived' | 'started' | 'ended' | 'cancelled';
 
   @Column({ nullable: false })
   duration: string;
@@ -50,6 +50,9 @@ export class Ride extends BaseModel {
 
   @Column({ nullable: false })
   driverPhoneNumber: string;
+
+  @Column({ type: 'float', nullable: false, default: 0.0 })
+  coinMined: number;
 
   @ManyToOne(() => User, (user) => user.rides, {
     nullable: true,

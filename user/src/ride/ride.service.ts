@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Ride } from 'src/entities/rides.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class RideService {
@@ -13,6 +13,52 @@ export class RideService {
   async findRideByRideId(rideId: string): Promise<Ride> {
     const ride = await this.rideRepository.findOneBy({ rideId });
     return ride;
+  }
+
+  async updateRideAndReturn(
+    rideId: string,
+    updateOptions: Partial<Ride>,
+  ): Promise<Ride> {
+    await this.rideRepository.update(
+      {
+        rideId,
+      },
+      updateOptions,
+    );
+
+    return await this.rideRepository.findOneBy({ rideId });
+  }
+
+  async findActiveRideById(rideId: string): Promise<Ride> {
+    const ride = await this.rideRepository.findOneBy({
+      rideId,
+      status: In(['booked', 'arrived', 'started']),
+    });
+
+    return ride;
+  }
+
+  async updateRide(rideId: string, updateOptions: Partial<Ride>) {
+    await this.rideRepository.update(
+      {
+        rideId,
+      },
+      updateOptions,
+    );
+  }
+
+  async updateRideStatus(
+    rideId: string,
+    userPhoneNumber: string,
+    updateOptions: Partial<Ride>,
+  ) {
+    await this.rideRepository.update(
+      {
+        rideId,
+        userPhoneNumber,
+      },
+      updateOptions,
+    );
   }
 
   create(createRideData: Partial<Ride>) {

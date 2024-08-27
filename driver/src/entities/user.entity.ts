@@ -11,6 +11,9 @@ export class User extends BaseModel {
   @Column({ unique: true, nullable: false })
   phoneNumber: string;
 
+  @Column({ nullable: true })
+  bio?: string;
+
   @Column({ default: false })
   isPhoneNumberConfirmed: boolean;
 
@@ -22,6 +25,9 @@ export class User extends BaseModel {
 
   @Column({ nullable: true })
   address?: string;
+
+  @Column({ nullable: true })
+  rating?: number;
 
   @Column({ nullable: true })
   profileImage?: string;

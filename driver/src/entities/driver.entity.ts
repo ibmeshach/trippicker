@@ -16,6 +16,9 @@ export class Driver extends BaseModel {
   @Index()
   phoneNumber: string;
 
+  @Column({ nullable: true })
+  bio?: string;
+
   @Column()
   licenseNumber: string;
 
@@ -31,6 +34,9 @@ export class Driver extends BaseModel {
   @Column({ nullable: true })
   address: string;
 
+  @Column({ nullable: true })
+  currentAddress?: string;
+
   @Column({ type: 'float', nullable: true })
   currentLatitude: number;
 
@@ -45,8 +51,11 @@ export class Driver extends BaseModel {
   @Index()
   isOnline: boolean;
 
-  @Column({ nullable: true })
-  rating: number;
+  @Column({ nullable: false, default: 0 }) // rating can be between 1 and 5
+  rating?: number;
+
+  @Column({ nullable: false, default: 0 })
+  noOfRating: number; // the no of users that have rated this user
 
   @Column({ default: 0 })
   numberOfRides: number;

@@ -15,6 +15,8 @@ import { Ride } from './entities/rides.entity';
 import { UserModule } from './user/user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ChatsModule } from './chats/chats.module';
+import { DriverModule } from './driver/driver.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -58,6 +60,8 @@ import { ChatsModule } from './chats/chats.module';
     RideModule,
     UserModule,
     ChatsModule,
+    DriverModule,
+    WalletModule,
   ],
 
   controllers: [AppController],
