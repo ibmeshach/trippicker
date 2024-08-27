@@ -57,3 +57,11 @@ interface SaveChatMessageProps {
   content: string;
   driverId: string;
 }
+
+interface EditDriverProfile {
+  userId: string;
+  fullname?: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+}
