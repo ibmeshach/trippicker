@@ -32,6 +32,8 @@ import { WalletModule } from './wallet/wallet.module';
         OTP_JWT_TOKEN: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
         REDIS_URL: Joi.string().required(),
+        TERMII_BASE_URL: Joi.string().required(),
+        TERMII_API_KEY: Joi.string().required(),
       }),
     }),
 

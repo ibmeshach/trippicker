@@ -8,6 +8,7 @@ import { SmsService } from 'src/sms/sms.service';
 import { RedisConfigService } from 'src/config/redis.service';
 import { Wallet } from 'src/entities/wallet.entity';
 import { WalletService } from 'src/wallet/wallet.service';
+import { HttpService } from '@nestjs/axios';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Driver, Wallet])],
@@ -19,6 +20,7 @@ import { WalletService } from 'src/wallet/wallet.service';
     RedisConfigService,
     WalletService,
     Logger,
+    HttpService,
   ],
 })
 export class AuthModule {}

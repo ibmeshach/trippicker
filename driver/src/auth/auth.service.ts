@@ -21,7 +21,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly driverService: DriverService,
     private readonly smsService: SmsService,
-    private readonly walletService: WalletService,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
   }
