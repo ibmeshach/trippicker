@@ -38,14 +38,14 @@ export class AuthService {
 
       const createdDriver = this.driverService.create(body);
 
-      const otpCode = this.smsService.generateOTP(4);
+      const otpCode = await this.smsService.sendOtp(driver.phoneNumber);
       const token = await this.encodeOptCodeInToken(createdDriver.id, otpCode);
 
       createdDriver.otpToken = token;
       const driverResponse = await this.queryRunner.manager.save(createdDriver);
 
       await this.queryRunner.commitTransaction();
-      return { driver: driverResponse, otpCode };
+      return 'created successfully';
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
       throw err;
@@ -71,7 +71,7 @@ export class AuthService {
         );
       }
 
-      const otpCode = this.smsService.generateOTP(4);
+      const otpCode = await this.smsService.sendOtp(driver.phoneNumber);
       const token = await this.encodeOptCodeInToken(driver.id, otpCode);
 
       const updatedDriver = await this.driverService.updateOtpToken({
@@ -81,7 +81,7 @@ export class AuthService {
 
       const driverResponse = new DriverEntity(updatedDriver);
 
-      return { driver: driverResponse, otpCode };
+      return 'login successfully, otp sent';
     } catch (err) {
       throw err;
     }
@@ -137,7 +137,7 @@ export class AuthService {
         HttpStatus.NOT_FOUND,
       );
 
-    const otpCode = this.smsService.generateOTP(4);
+    const otpCode = await this.smsService.sendOtp(driver.phoneNumber);
     const token = await this.encodeOptCodeInToken(driver.id, otpCode);
 
     const updatedDriver = await this.driverService.updateOtpToken({
@@ -145,7 +145,7 @@ export class AuthService {
       otpToken: token,
     });
 
-    if (updatedDriver) return { otpCode };
+    if (updatedDriver) return 'otp sent';
   }
 
   async generateToken(payload: {}, secret: string, expire_time: string | null) {

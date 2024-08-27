@@ -7,9 +7,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { SmsService } from 'src/sms/sms.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { TwilioModule, TwilioService } from 'nestjs-twilio';
 import { ConfigModule } from '@nestjs/config';
 import { AppService } from '../app.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -29,6 +29,7 @@ import { AppService } from '../app.service';
         },
       },
     ]),
+    HttpModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UserService, SmsService, AppService],

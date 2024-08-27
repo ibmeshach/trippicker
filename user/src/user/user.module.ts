@@ -9,6 +9,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RideService } from 'src/ride/ride.service';
 import { Ride } from 'src/entities/rides.entity';
 import { ChatMessage } from 'src/entities/chatMessage.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -18,11 +19,12 @@ import { ChatMessage } from 'src/entities/chatMessage.entity';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
     ]),
+    HttpModule,
   ],
   providers: [UserService, AuthService, SmsService, RideService],
   exports: [UserService],

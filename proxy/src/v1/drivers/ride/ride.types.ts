@@ -14,7 +14,18 @@ interface RideRequestProps {
   destination: LatLng[];
 }
 
-interface CancelRideProps {
-  userId: string;
+interface EndTripProps {
   rideId: string;
+  userId: string;
+  coinMined: number;
+}
+
+interface ArrivedTripProps {
+  rideId: string;
+  userId: string;
+}
+
+interface StartTripProps {
+  rideId: string;
+  userId: string;
 }

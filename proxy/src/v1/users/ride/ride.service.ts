@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
-import { ClosestDriverEvent } from './ride.events';
+import { CancelRideEvent, ClosestDriverEvent } from './ride.events';
 import { GatewayService } from 'src/v1/gateway/gateway.service';
 import { EventsService } from 'src/v1/events/events.service';
 
@@ -9,6 +9,7 @@ import { EventsService } from 'src/v1/events/events.service';
 export class RideService {
   constructor(
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
+    @Inject('USERS') private readonly usersClient: ClientProxy,
     @Inject(forwardRef(() => EventsService))
     private readonly eventsService: EventsService,
   ) {}
@@ -40,5 +41,15 @@ export class RideService {
       driver: driver,
       user: user,
     });
+  }
+
+  async cancelRide(body: CancelRideProps) {
+    const observableData = this.usersClient
+      .send('user.cancelRide', new CancelRideEvent(body))
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
   }
 }

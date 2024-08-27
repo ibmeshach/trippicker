@@ -9,20 +9,22 @@ import {
 import { CustomException } from 'src/custom.exception';
 import { AuthService } from '../services/auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { AppService } from 'src/app.service';
+import { SmsService } from 'src/sms/sms.service';
 
 @Controller()
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private appService: AppService,
+    private smsService: SmsService,
   ) {}
   @MessagePattern('user.signup')
   @UseInterceptors(ClassSerializerInterceptor)
   async signup(@Payload() { data }: { data: SignupProps }) {
     try {
+      // await this.smsService.sendOtp('8061909748');
       return await this.authService.registerUser(data);
     } catch (err) {
+      console.log(err);
       if (err instanceof CustomException) {
         throw err;
       } else {
@@ -38,7 +40,6 @@ export class AuthController {
   @UseInterceptors(ClassSerializerInterceptor)
   async login(@Payload() { data }: { data: LoginProps }) {
     try {
-      await this.appService.sendSMS('');
       return await this.authService.loginUser(data);
     } catch (err) {
       if (err instanceof CustomException) {

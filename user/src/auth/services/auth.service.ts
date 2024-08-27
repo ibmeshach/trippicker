@@ -37,7 +37,7 @@ export class AuthService {
 
       const createdUser = this.userService.create(body);
 
-      const otpCode = this.smsService.generateOTP(4);
+      const otpCode = await this.smsService.sendOtp(user.phoneNumber);
       const token = await this.encodeOptCodeInToken(createdUser.id, otpCode);
 
       createdUser.otpToken = token;
@@ -46,7 +46,7 @@ export class AuthService {
       const userResponse = new UserEntity(newUser);
 
       await this.queryRunner.commitTransaction();
-      return { user: userResponse, otpCode };
+      return 'created successfully';
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
       throw err;
@@ -72,7 +72,8 @@ export class AuthService {
         );
       }
 
-      const otpCode = this.smsService.generateOTP(4);
+      const otpCode = await this.smsService.sendOtp(user.phoneNumber);
+
       const token = await this.encodeOptCodeInToken(user.id, otpCode);
 
       const updatedUser = await this.userService.updateOtpToken({
@@ -82,7 +83,7 @@ export class AuthService {
 
       const userResponse = new UserEntity(updatedUser);
 
-      return { user: userResponse, otpCode };
+      return 'login successfully, otp sent';
     } catch (err) {
       throw err;
     }
@@ -134,7 +135,7 @@ export class AuthService {
         HttpStatus.NOT_FOUND,
       );
 
-    const otpCode = this.smsService.generateOTP(4);
+    const otpCode = await this.smsService.sendOtp(user.phoneNumber);
     const token = await this.encodeOptCodeInToken(user.id, otpCode);
 
     const updatedUser = await this.userService.updateOtpToken({
@@ -142,7 +143,7 @@ export class AuthService {
       otpToken: token,
     });
 
-    if (updatedUser) return { otpCode };
+    if (user) return 'otp sent';
   }
 
   async generateToken(payload: {}, secret: string, expire_time: string | null) {

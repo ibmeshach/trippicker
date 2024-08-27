@@ -18,6 +18,7 @@ import { UserRideModule } from './v1/users/ride/ride.module';
 import { GatewayModule } from './v1/gateway/gateway.module';
 import { EventsModule } from './v1/events/events.module';
 import { ChatsModule } from './v1/chats/chats.module';
+import { DriverRideModule } from './v1/drivers/ride/ride.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ChatsModule } from './v1/chats/chats.module';
     UsersAuthModule,
     GatewayModule,
     UserRideModule,
+    DriverRideModule,
     EventsModule,
     ChatsModule,
   ],

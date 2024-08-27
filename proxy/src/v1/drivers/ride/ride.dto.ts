@@ -77,7 +77,37 @@ export class RequestRideDto {
   destination: LatLng[];
 }
 
-export class CancelRideDto {
+export class EndTripDto {
+  @ApiProperty({
+    example:
+      'MTcyNDQyMjU3MTgxOC0wOWFiZGJlOC0yMTkxLTRmODItOTI5Ny05M2Y3MmJjNTI5ZTI=',
+    description: 'rideId of the ride',
+  })
+  @IsNotEmpty()
+  @IsString()
+  rideId: string;
+
+  @ApiProperty({
+    example: 0.0002,
+    description: 'coin mined',
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  coinMined: number;
+}
+
+export class ArrivedTripDto {
+  @ApiProperty({
+    example:
+      'MTcyNDQyMjU3MTgxOC0wOWFiZGJlOC0yMTkxLTRmODItOTI5Ny05M2Y3MmJjNTI5ZTI=',
+    description: 'rideId of the ride',
+  })
+  @IsNotEmpty()
+  @IsString()
+  rideId: string;
+}
+
+export class StartTripDto {
   @ApiProperty({
     example:
       'MTcyNDQyMjU3MTgxOC0wOWFiZGJlOC0yMTkxLTRmODItOTI5Ny05M2Y3MmJjNTI5ZTI=',

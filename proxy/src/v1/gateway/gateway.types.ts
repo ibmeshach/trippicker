@@ -55,6 +55,6 @@ interface DriverRideResponseFinalProps {
   rideId: string;
 }
 
-interface GetCurrentLocationProps {
+interface TrackRideProps {
   rideId: string;
 }

@@ -11,8 +11,8 @@ import { Server, Socket } from 'socket.io';
 import { catchError, firstValueFrom } from 'rxjs';
 import {
   BookRideEvent,
-  GetCurrentLocationEvent,
   GetNearestDriversEvent,
+  TrackRideEvent,
   UpdateDriverLocationEvent,
   UpdateUserLocationEvent,
 } from './gateway.events';
@@ -51,10 +51,10 @@ export class GatewayService implements OnModuleInit {
 
   @SubscribeMessage('trackRide')
   async trackRide(@MessageBody() data: { rideId: string }) {
-    const observableDriverLocation = this.driversClient
+    const observableDriverDetails = this.driversClient
       .send(
-        'driver.getCurrentLocation',
-        new GetCurrentLocationEvent({
+        'driver.trackRide',
+        new TrackRideEvent({
           rideId: data.rideId,
         }),
       )
@@ -64,10 +64,10 @@ export class GatewayService implements OnModuleInit {
         }),
       );
 
-    const observableUserLocation = this.usersClient
+    const observableUserDetails = this.usersClient
       .send(
-        'user.getCurrentLocation',
-        new GetCurrentLocationEvent({
+        'user.trackRide',
+        new TrackRideEvent({
           rideId: data.rideId,
         }),
       )
@@ -77,12 +77,19 @@ export class GatewayService implements OnModuleInit {
         }),
       );
 
-    const driverLocation = await firstValueFrom(observableDriverLocation);
-    const userLocation = await firstValueFrom(observableUserLocation);
+    const driverDetails = await firstValueFrom(observableDriverDetails);
+    const userDetails = await firstValueFrom(observableUserDetails);
 
-    this.server.emit(`trackRide:${data.rideId}`, {
-      driverLocation,
-      userLocation,
+    this.server.emit(`trackRide:${data.rideId}:${driverDetails.id}`, {
+      ride: driverDetails.ride,
+      driverLocatin: driverDetails.location,
+      userLocation: userDetails.location,
+    });
+
+    this.server.emit(`trackRide:${data.rideId}:${userDetails.id}`, {
+      ride: driverDetails.ride,
+      driverLocatin: driverDetails.location,
+      userLocation: userDetails.location,
     });
   }
 

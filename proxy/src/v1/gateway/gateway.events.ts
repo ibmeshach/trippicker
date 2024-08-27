@@ -14,6 +14,6 @@ export class BookRideEvent {
   constructor(public readonly data: DriverRideResponseFinalProps) {}
 }
 
-export class GetCurrentLocationEvent {
-  constructor(public readonly data: GetCurrentLocationProps) {}
+export class TrackRideEvent {
+  constructor(public readonly data: TrackRideProps) {}
 }

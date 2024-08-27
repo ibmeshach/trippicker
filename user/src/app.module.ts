@@ -15,19 +15,9 @@ import { Ride } from './entities/rides.entity';
 import { UserModule } from './user/user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ChatsModule } from './chats/chats.module';
-import { TwilioModule } from 'nestjs-twilio';
 
 @Module({
   imports: [
-    TwilioModule.forRootAsync({
-      isGlobal: true,
-      inject: [ConfigService],
-      imports: [ConfigModule],
-      useFactory: (cfg: ConfigService) => ({
-        accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
-        authToken: cfg.get('TWILIO_AUTH_TOKEN'),
-      }),
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
@@ -38,6 +28,8 @@ import { TwilioModule } from 'nestjs-twilio';
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DATABASE: Joi.string().required(),
         OTP_JWT_TOKEN: Joi.string().required(),
+        TERMII_BASE_URL: Joi.string().required(),
+        TERMII_API_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -48,17 +40,12 @@ import { TwilioModule } from 'nestjs-twilio';
       },
     }),
 
-    TwilioModule.forRoot({
-      accountSid: process.env.TWILIO_ACCOUNT_SID,
-      authToken: process.env.TWILIO_AUTH_TOKEN,
-    }),
-
     ClientsModule.register([
       {
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req } from '@nestjs/common';
 import { RideService } from './ride.service';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RequestRideDto } from './ride.dto';
+import { CancelRideDto, RequestRideDto } from './ride.dto';
 import { Request } from 'express';
 
 @ApiTags('ride')
@@ -36,5 +36,28 @@ export class RideController {
     });
 
     return 'success';
+  }
+
+  @Post('cancel-ride')
+  @ApiResponse({
+    status: 201,
+    description: 'cancel ride',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBody({
+    type: CancelRideDto,
+    description: 'Json structure for cancel a ride',
+  })
+  async cancelRide(
+    @Body() body: CancelRideDto,
+    @Req() req: Request,
+  ): Promise<any> {
+    const userId = req['user'].sub;
+    await this.rideService.cancelRide({
+      userId,
+      ...body,
+    });
+
+    return 'Success';
   }
 }
