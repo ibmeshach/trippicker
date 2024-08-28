@@ -4,8 +4,8 @@ import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
 export class LoginDto {
   @IsNotEmpty()
   @IsString()
-  @Matches(/^\d{10,11}$/, {
-    message: 'Phone number must be between 10 and 11 digits long',
+  @Matches(/^\d{11}$/, {
+    message: 'Phone number must be 11 digits long',
   })
   @ApiProperty({
     example: '08012345678',
@@ -25,8 +25,8 @@ export class SignUpDto {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^\d{10,11}$/, {
-    message: 'Phone number must be between 10 and 11 digits long',
+  @Matches(/^\d{11}$/, {
+    message: 'Phone number must be 11 digits long',
   })
   @ApiProperty({
     example: '08012345678',
@@ -46,8 +46,8 @@ export class SignUpDto {
 export class VerifyOtpDto {
   @IsNotEmpty()
   @IsString()
-  @Matches(/^\d{10,11}$/, {
-    message: 'Phone number must be between 10 and 11 digits long',
+  @Matches(/^\d{11}$/, {
+    message: 'Phone number must be 11 digits long',
   })
   @ApiProperty({
     example: '08012345678',
@@ -70,8 +70,8 @@ export class VerifyOtpDto {
 export class ResendOtpDto {
   @IsNotEmpty()
   @IsString()
-  @Matches(/^\d{10,11}$/, {
-    message: 'Phone number must be between 10 and 11 digits long',
+  @Matches(/^\d{11}$/, {
+    message: 'Phone number must be 11 digits long',
   })
   @ApiProperty({
     example: '08012345678',

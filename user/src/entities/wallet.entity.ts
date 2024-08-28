@@ -8,10 +8,13 @@ export class Wallet extends BaseModel {
   @Index()
   userId: string;
 
-  @Column({ nullable: false, default: 0.0 })
+  @Column({ type: 'float', nullable: false, default: 0.0 })
   coinBalance: number;
 
-  @Column({ nullable: false, default: 0.0 })
+  @Column({ type: 'float', default: 0.0 })
+  coinTotalMillage: number;
+
+  @Column({ type: 'float', nullable: false, default: 0.0 })
   nairaBalance: number;
 
   @OneToOne(() => User)

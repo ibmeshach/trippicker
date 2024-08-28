@@ -1,6 +1,6 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { RideService } from './ride.service';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CancelRideDto, RequestRideDto } from './ride.dto';
 import { Request } from 'express';
 
@@ -32,6 +32,8 @@ export class RideController {
       duration: body.duration,
       origin: body.origin,
       destination: body.destination,
+      originAddress: body.originAddress,
+      destinationAddresses: body.destinationAddresses,
       driverId: '',
     });
 
@@ -53,11 +55,49 @@ export class RideController {
     @Req() req: Request,
   ): Promise<any> {
     const userId = req['user'].sub;
+
+    console.log('userId', userId);
     await this.rideService.cancelRide({
       userId,
       ...body,
     });
 
     return 'Success';
+  }
+
+  @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Fetched rides',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  async getRides(@Req() req: Request): Promise<any> {
+    const userId = req['user'].sub;
+
+    const res = await this.rideService.getRides({
+      userId,
+    });
+
+    return res;
+  }
+
+  @Get(':rideId')
+  @ApiResponse({
+    status: 200,
+    description: 'Fetched rides',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden.' })
+  async getRide(
+    @Req() req: Request,
+    @Query('rideId') rideId: string,
+  ): Promise<any> {
+    const userId = req['user'].sub;
+
+    const res = await this.rideService.getRide({
+      userId,
+      rideId,
+    });
+
+    return res;
   }
 }

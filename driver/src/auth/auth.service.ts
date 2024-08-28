@@ -21,7 +21,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly driverService: DriverService,
     private readonly smsService: SmsService,
-    private readonly walletService: WalletService,
   ) {
     this.queryRunner = this.dataSource.createQueryRunner();
   }
@@ -42,11 +41,13 @@ export class AuthService {
 
       const createdDriver = this.queryRunner.manager.create(Driver, body);
 
+      await this.queryRunner.manager.save(createdDriver);
+
       const driverWallet = this.queryRunner.manager.create(Wallet, {
         driverId: createdDriver.id,
       });
 
-      const otpCode = await this.smsService.sendOtp(driver.phoneNumber);
+      const otpCode = await this.smsService.sendOtp(createdDriver.phoneNumber);
       const token = await this.encodeOptCodeInToken(createdDriver.id, otpCode);
 
       createdDriver.otpToken = token;

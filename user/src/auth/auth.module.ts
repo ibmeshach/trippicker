@@ -13,7 +13,7 @@ import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
-    ConfigModule, // Ensure ConfigModule is imported
+    ConfigModule,
 
     JwtModule.register({
       global: true,
@@ -24,7 +24,7 @@ import { HttpModule } from '@nestjs/axios';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

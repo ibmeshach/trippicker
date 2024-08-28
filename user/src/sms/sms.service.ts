@@ -3,6 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { catchError, map } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
+import axios from 'axios';
 
 @Injectable()
 export class SmsService {
@@ -29,28 +30,22 @@ export class SmsService {
 
   async sendOtp(phoneNumber: string): Promise<any> {
     try {
+      // Remove the first zero if it exists
+      const formattedPhoneNumber = phoneNumber.startsWith('0')
+        ? phoneNumber.slice(1)
+        : phoneNumber;
+
+      console.log(formattedPhoneNumber);
+
       const otpCode = this.generateOTP(4);
-      const response = await firstValueFrom(
-        this.httpService
-          .post(this.sendSmsUrl, {
-            api_key: this.configService.get<string>('TERMII_API_KEY'),
-            to: `234${phoneNumber}`,
-            from: 'Trippicker',
-            sms: `Your trippicker pin is-${otpCode}. It expires in 1min.`,
-            type: 'plain',
-            channel: 'generic',
-          })
-          .pipe(
-            map((response) => response.data),
-            catchError((error) => {
-              console.error(error);
-              throw new HttpException(
-                'Failed to send OTP',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-              );
-            }),
-          ),
-      );
+      const response = await axios.post(this.sendSmsUrl, {
+        api_key: this.configService.get<string>('TERMII_API_KEY'),
+        to: `234${formattedPhoneNumber}`,
+        from: 'Trippicker',
+        sms: `Your trippicker pin is-${otpCode}. It expires in 1min.`,
+        type: 'plain',
+        channel: 'generic',
+      });
 
       console.log({ res: response });
       return otpCode;
@@ -62,4 +57,47 @@ export class SmsService {
       );
     }
   }
+
+  // async sendOtp(phoneNumber: string): Promise<any> {
+  //   try {
+  //     // Remove the first zero if it exists
+  //     const formattedPhoneNumber = phoneNumber.startsWith('0')
+  //       ? phoneNumber.slice(1)
+  //       : phoneNumber;
+
+  //     console.log(formattedPhoneNumber);
+
+  //     const otpCode = this.generateOTP(4);
+  //     const response = await firstValueFrom(
+  //       this.httpService
+  //         .post(this.sendSmsUrl, {
+  //           api_key: this.configService.get<string>('TERMII_API_KEY'),
+  //           to: `234${formattedPhoneNumber}`,
+  //           from: 'Trippicker',
+  //           sms: `Your trippicker pin is-${otpCode}. It expires in 1min.`,
+  //           type: 'plain',
+  //           channel: 'generic',
+  //         })
+  //         .pipe(
+  //           map((response) => response.data),
+  //           catchError((error) => {
+  //             console.error(error);
+  //             throw new HttpException(
+  //               'Failed to send OTP',
+  //               HttpStatus.INTERNAL_SERVER_ERROR,
+  //             );
+  //           }),
+  //         ),
+  //     );
+
+  //     console.log({ res: response });
+  //     return otpCode;
+  //   } catch (error) {
+  //     console.error(error);
+  //     throw new HttpException(
+  //       'Failed to send OTP',
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 }

@@ -120,6 +120,7 @@ export class UserController {
         where: { phoneNumber: data.driver.phoneNumber },
       });
 
+      const driverId = data.driver.id;
       delete data.driver.id;
       if (!driver) {
         // Create a new driver if it does not exist
@@ -149,7 +150,10 @@ export class UserController {
       await this.queryRunner.manager.save(driver);
 
       await this.queryRunner.commitTransaction();
-      return ride;
+      return {
+        ...ride,
+        driverId,
+      };
     } catch (err) {
       await this.queryRunner.rollbackTransaction();
       console.log(err);

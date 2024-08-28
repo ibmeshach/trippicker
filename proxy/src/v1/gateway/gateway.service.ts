@@ -163,6 +163,8 @@ export class GatewayService implements OnModuleInit {
         duration: rideDetails.duration,
         range: rideDetails.distance,
         cost: rideDetails.cost,
+        originAddress: data.originAddress,
+        destinationAddresses: data.destinationAddresses,
       };
     } catch (error) {
       throw error;
@@ -230,7 +232,7 @@ export class GatewayService implements OnModuleInit {
 
       this.requestRideResponse(userRide);
 
-      return userRide;
+      return driverRide;
     } else {
       if (currentRetryCount < 3) {
         this.retryCounts.set(userId, currentRetryCount + 1);
@@ -243,6 +245,8 @@ export class GatewayService implements OnModuleInit {
           duration: data.duration,
           origin: data.origin,
           destination: data.destination,
+          originAddress: data.originAddress,
+          destinationAddresses: data.destinationAddresses,
         });
       } else {
         this.retryCounts.set(userId, 0);

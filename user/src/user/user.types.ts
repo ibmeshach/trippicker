@@ -40,6 +40,8 @@ interface UserRideResponseProps {
   user: any;
   driver: any;
   rideId: string;
+  originAddress: string;
+  destinationAddresses: string[];
 }
 
 interface SaveChatMessageProps {

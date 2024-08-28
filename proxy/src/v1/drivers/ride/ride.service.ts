@@ -3,11 +3,11 @@ import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
 import {
   ArrivedTripEvent,
-  ClosestDriverEvent,
   EndTripEvent,
+  GetRideEvent,
+  GetRidesEvent,
   StartTripEvent,
 } from './ride.events';
-import { GatewayService } from 'src/v1/gateway/gateway.service';
 import { EventsService } from 'src/v1/events/events.service';
 
 @Injectable()
@@ -26,6 +26,8 @@ export class RideService {
           throw error;
         }),
       );
+
+    await firstValueFrom(observableData);
   }
 
   async arrivedTrip(body: ArrivedTripProps) {
@@ -36,15 +38,47 @@ export class RideService {
           throw error;
         }),
       );
+
+    await firstValueFrom(observableData);
   }
 
   async startTrip(body: StartTripProps) {
     const observableData = this.driversClient
-      .send('driver.arrivedTrip', new StartTripEvent(body))
+      .send('driver.startTrip', new StartTripEvent(body))
       .pipe(
         catchError((error) => {
           throw error;
         }),
       );
+
+    await firstValueFrom(observableData);
+  }
+
+  async getRides(body: GetRidesProps) {
+    const observableData = this.driversClient
+      .send('driver.rideHistories', new GetRidesEvent(body))
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+
+    const data = await firstValueFrom(observableData);
+
+    return data;
+  }
+
+  async getRide(body: GetRideProps) {
+    const observableData = this.driversClient
+      .send('driver.rideDetails', new GetRideEvent(body))
+      .pipe(
+        catchError((error) => {
+          throw error;
+        }),
+      );
+
+    const data = await firstValueFrom(observableData);
+
+    return data;
   }
 }

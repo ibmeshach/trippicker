@@ -3,14 +3,18 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Inject,
   UseInterceptors,
 } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { RideService } from './ride.service';
 import { Ride } from 'src/entities/rides.entity';
 import { UserService } from 'src/user/user.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import { catchError, firstValueFrom } from 'rxjs';
+import { CancelRideEvent } from './ride.events';
+import { DriverService } from 'src/driver/driver.service';
 
 @Controller('ride')
 export class RideController {
@@ -18,6 +22,8 @@ export class RideController {
     private readonly rideService: RideService,
     private readonly userService: UserService,
     private readonly walletService: WalletService,
+    private readonly driverService: DriverService,
+    @Inject('DRIVERS') private readonly driversClient: ClientProxy,
   ) {}
 
   @MessagePattern('user.trackRide')
@@ -58,7 +64,7 @@ export class RideController {
   }
 
   @MessagePattern('user.cancelRide')
-  async getAllChatMessages(
+  async cancelRide(
     @Payload() { data }: { data: { userId: string; rideId: string } },
   ) {
     try {
@@ -70,8 +76,89 @@ export class RideController {
           HttpStatus.BAD_REQUEST,
         );
 
-      await this.rideService.updateRideStatus(data.rideId, user.phoneNumber, {
+      const ride = await this.rideService.updateRideAndReturn(data.rideId, {
         status: 'cancelled',
+      });
+
+      const driver = await this.driverService.findDriverByPhoneNumber(
+        ride.driverPhoneNumber,
+      );
+
+      const observableData = this.driversClient
+        .send(
+          'driver.cancelRide',
+          new CancelRideEvent({
+            phoneNumber: driver.phoneNumber,
+            rideId: data.rideId,
+          }),
+        )
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      await firstValueFrom(observableData);
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.arrivedTrip')
+  async arrivedTrip(@Payload() { data }: { data: RideArrivedTripProps }) {
+    try {
+      const user = await this.userService.findUserByPhoneNumber(
+        data.phoneNumber,
+      );
+
+      if (!user)
+        throw new CustomException(
+          'Enter a valid user phoneNumber',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      await this.rideService.updateRideStatus(data.rideId, data.phoneNumber, {
+        status: 'arrived',
+      });
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.startTrip')
+  async startTrip(@Payload() { data }: { data: RideStartTripProps }) {
+    try {
+      const user = await this.userService.findUserByPhoneNumber(
+        data.phoneNumber,
+      );
+
+      if (!user)
+        throw new CustomException(
+          'Enter a valid user phoneNumber',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      await this.rideService.updateRideStatus(data.rideId, data.phoneNumber, {
+        status: 'started',
       });
 
       return { status: true };

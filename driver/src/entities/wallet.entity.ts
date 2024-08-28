@@ -8,13 +8,13 @@ export class Wallet extends BaseModel {
   @Index()
   driverId: string;
 
-  @Column({ nullable: false, default: 0.0 })
+  @Column({ type: 'float', nullable: false, default: 0.0 })
   coinBalance: number;
 
   @Column({ type: 'float', default: 0.0 })
   coinTotalMillage: number;
 
-  @Column({ nullable: false, default: 0.0 })
+  @Column({ type: 'float', nullable: false, default: 0.0 })
   nairaBalance: number;
 
   @OneToOne(() => Driver)

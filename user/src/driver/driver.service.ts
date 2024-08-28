@@ -10,6 +10,11 @@ export class DriverService {
     private driverRepository: Repository<Driver>,
   ) {}
 
+  async findDriverByPhoneNumber(phoneNumber: string): Promise<Driver> {
+    const driver = await this.driverRepository.findOneBy({ phoneNumber });
+    return driver;
+  }
+
   async findDriverById(driverId: string): Promise<Driver | undefined> {
     const driver = await this.driverRepository.findOneBy({ id: driverId });
 

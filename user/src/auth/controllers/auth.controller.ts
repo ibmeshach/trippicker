@@ -21,7 +21,6 @@ export class AuthController {
   @UseInterceptors(ClassSerializerInterceptor)
   async signup(@Payload() { data }: { data: SignupProps }) {
     try {
-      // await this.smsService.sendOtp('8061909748');
       return await this.authService.registerUser(data);
     } catch (err) {
       console.log(err);

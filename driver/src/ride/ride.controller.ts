@@ -12,8 +12,9 @@ import { RideService } from './ride.service';
 import { DriverService } from 'src/driver/driver.service';
 import { CustomException } from 'src/custom.exception';
 import { WalletService } from 'src/wallet/wallet.service';
-import { catchError } from 'rxjs';
-import { EndTripEvent } from './ride.event';
+import { catchError, firstValueFrom } from 'rxjs';
+import { EndTripEvent, StartTripEvent } from './ride.event';
+import { UserService } from 'src/user/user.service';
 
 @Controller('ride')
 export class RideController {
@@ -21,6 +22,7 @@ export class RideController {
     private readonly rideService: RideService,
     private readonly driverService: DriverService,
     private readonly walletService: WalletService,
+    private readonly userService: UserService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {}
 
@@ -62,6 +64,37 @@ export class RideController {
     }
   }
 
+  @MessagePattern('driver.cancelRide')
+  async cancelRide(@Payload() { data }: { data: CancelRideProps }) {
+    try {
+      const driver = await this.driverService.findDriverByPhoneNumber(
+        data.phoneNumber,
+      );
+
+      if (!driver)
+        throw new CustomException(
+          'Enter a valid driverPhoneNumber',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      await this.rideService.updateRideStatus(data.rideId, data.phoneNumber, {
+        status: 'cancelled',
+      });
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
   @MessagePattern('driver.arrivedTrip')
   async arrivedTrip(@Payload() { data }: { data: RideStausProps }) {
     try {
@@ -73,10 +106,33 @@ export class RideController {
           HttpStatus.BAD_REQUEST,
         );
 
-      await this.rideService.updateRideStatus(data.rideId, driver.phoneNumber, {
-        status: 'arrived',
-      });
+      const ride = await this.rideService.updateRideStatusAndReturn(
+        data.rideId,
+        driver.phoneNumber,
+        {
+          status: 'arrived',
+        },
+      );
 
+      const user = await this.userService.findUserByPhoneNumber(
+        ride.userPhoneNumber,
+      );
+
+      const observableData = this.usersClient
+        .send(
+          'user.arrivedTrip',
+          new StartTripEvent({
+            phoneNumber: user.phoneNumber,
+            rideId: data.rideId,
+          }),
+        )
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      await firstValueFrom(observableData);
       return { status: true };
     } catch (err) {
       console.log(err);
@@ -102,10 +158,33 @@ export class RideController {
           HttpStatus.BAD_REQUEST,
         );
 
-      await this.rideService.updateRideStatus(data.rideId, driver.phoneNumber, {
-        status: 'started',
-      });
+      const ride = await this.rideService.updateRideStatusAndReturn(
+        data.rideId,
+        driver.phoneNumber,
+        {
+          status: 'started',
+        },
+      );
 
+      const user = await this.userService.findUserByPhoneNumber(
+        ride.userPhoneNumber,
+      );
+
+      const observableData = this.usersClient
+        .send(
+          'user.startTrip',
+          new StartTripEvent({
+            phoneNumber: user.phoneNumber,
+            rideId: data.rideId,
+          }),
+        )
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      await firstValueFrom(observableData);
       return { status: true };
     } catch (err) {
       console.log(err);
@@ -141,6 +220,10 @@ export class RideController {
         coinMined: data.coinMined,
       });
 
+      const user = await this.userService.findUserByPhoneNumber(
+        ride.userPhoneNumber,
+      );
+
       const rate = 8 * Math.pow(10, -4);
       const maxCoin = rate * ride.distance;
 
@@ -152,11 +235,11 @@ export class RideController {
 
       await wallet.save();
 
-      this.usersClient
+      const observableData = this.usersClient
         .send(
-          'driver.arrivedTrip',
+          'user.endTrip',
           new EndTripEvent({
-            phoneNumber: ride.user.phoneNumber,
+            phoneNumber: user.phoneNumber,
             rideId: data.rideId,
             coinMined: data.coinMined,
           }),
@@ -167,6 +250,7 @@ export class RideController {
           }),
         );
 
+      await firstValueFrom(observableData);
       return { status: true };
     } catch (err) {
       console.log(err);

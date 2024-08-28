@@ -26,6 +26,9 @@ export class UserService {
     return undefined;
   }
 
+  async findUserByPhoneNumber(phoneNumber: string) {
+    return await this.usersRepository.findOneBy({ phoneNumber });
+  }
   create(createUserData: Partial<User>) {
     const user = this.usersRepository.create(createUserData);
     return user;

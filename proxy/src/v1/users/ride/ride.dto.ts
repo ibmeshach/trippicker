@@ -75,6 +75,22 @@ export class RequestRideDto {
     description: 'Destination points of the ride (latitude and longitude)',
   })
   destination: LatLng[];
+
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({
+    example: 'unibern',
+    description: 'origin address',
+  })
+  originAddress: string;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ApiProperty({
+    description: 'Destination addresses',
+  })
+  destinationAddresses: string[];
 }
 
 export class CancelRideDto {

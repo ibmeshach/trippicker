@@ -13,3 +13,11 @@ export class ArrivedTripEvent {
 export class StartTripEvent {
   constructor(public readonly data: StartTripProps) {}
 }
+
+export class GetRidesEvent {
+  constructor(public readonly data: GetRidesProps) {}
+}
+
+export class GetRideEvent {
+  constructor(public readonly data: GetRideProps) {}
+}

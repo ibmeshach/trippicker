@@ -27,7 +27,7 @@ import { DriverRideModule } from './v1/drivers/ride/ride.module';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          // host: 'users-nestjs-backend.railway.internal',
+          host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
@@ -35,7 +35,7 @@ import { DriverRideModule } from './v1/drivers/ride/ride.module';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

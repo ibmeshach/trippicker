@@ -13,6 +13,8 @@ interface UpdateLocationsProps {
 interface PartialRideDetailsProps {
   origin: LatLng;
   destination: LatLng[];
+  originAddress: string;
+  destinationAddresses: string[];
   distance: number;
 }
 
@@ -30,6 +32,9 @@ interface RequestRideGatewayProps {
   destination: LatLng[];
   driver: any;
   user: any;
+  originAddress: string;
+  destinationAddresses: string[];
+  driverId?: string;
 }
 
 interface DriverRideResponseProps {
@@ -41,6 +46,8 @@ interface DriverRideResponseProps {
   destination: LatLng[];
   user: any;
   driver: any;
+  originAddress: string;
+  destinationAddresses: string[];
 }
 
 interface DriverRideResponseFinalProps {

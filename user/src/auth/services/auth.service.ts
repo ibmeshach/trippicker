@@ -39,11 +39,13 @@ export class AuthService {
 
       const createdUser = this.queryRunner.manager.create(User, body);
 
+      await this.queryRunner.manager.save(createdUser);
+
       const userWallet = this.queryRunner.manager.create(Wallet, {
         userId: createdUser.id,
       });
 
-      const otpCode = await this.smsService.sendOtp(user.phoneNumber);
+      const otpCode = await this.smsService.sendOtp(createdUser.phoneNumber);
       const token = await this.encodeOptCodeInToken(createdUser.id, otpCode);
 
       createdUser.otpToken = token;
@@ -53,6 +55,7 @@ export class AuthService {
       await this.queryRunner.commitTransaction();
       return 'created successfully';
     } catch (err) {
+      console.log('error', err);
       await this.queryRunner.rollbackTransaction();
       throw err;
     }

@@ -10,7 +10,7 @@ import { SmsService } from './sms.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         baseURL: configService.get<string>('TERMII_BASE_URL'),
-        timeout: 30000,
+        timeout: 300000,
         headers: {
           'Content-Type': 'application/json',
         },

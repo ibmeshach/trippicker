@@ -10,7 +10,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
