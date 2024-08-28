@@ -12,3 +12,13 @@ interface EndTripProps {
   rideId: string;
   coinMined: number;
 }
+
+interface StartTripProps {
+  phoneNumber: string;
+  rideId: string;
+}
+
+interface CancelRideProps {
+  phoneNumber: string;
+  rideId: string;
+}

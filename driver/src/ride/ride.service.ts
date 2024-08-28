@@ -60,6 +60,23 @@ export class RideService {
       updateOptions,
     );
   }
+
+  async updateRideStatusAndReturn(
+    rideId: string,
+    driverPhoneNumber: string,
+    updateOptions: Partial<Ride>,
+  ) {
+    await this.rideRepository.update(
+      {
+        rideId,
+        driverPhoneNumber,
+      },
+      updateOptions,
+    );
+
+    return await this.rideRepository.findOneBy({ rideId });
+  }
+
   create(createRideData: Partial<Ride>) {
     const driver = this.rideRepository.create(createRideData);
     return driver;

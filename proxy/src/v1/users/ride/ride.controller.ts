@@ -53,6 +53,8 @@ export class RideController {
     @Req() req: Request,
   ): Promise<any> {
     const userId = req['user'].sub;
+
+    console.log('userId', userId);
     await this.rideService.cancelRide({
       userId,
       ...body,

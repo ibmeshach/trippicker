@@ -29,12 +29,17 @@ export class SmsService {
 
   async sendOtp(phoneNumber: string): Promise<any> {
     try {
+      // Remove the first zero if it exists
+      const formattedPhoneNumber = phoneNumber.startsWith('0')
+        ? phoneNumber.slice(1)
+        : phoneNumber;
+
       const otpCode = this.generateOTP(4);
       const response = await firstValueFrom(
         this.httpService
           .post(this.sendSmsUrl, {
             api_key: this.configService.get<string>('TERMII_API_KEY'),
-            to: `234${phoneNumber}`,
+            to: `234${formattedPhoneNumber}`,
             from: 'Trippicker',
             sms: `Your trippicker pin is-${otpCode}. It expires in 1min.`,
             type: 'plain',

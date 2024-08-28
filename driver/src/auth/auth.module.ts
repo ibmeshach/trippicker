@@ -8,10 +8,11 @@ import { SmsService } from 'src/sms/sms.service';
 import { RedisConfigService } from 'src/config/redis.service';
 import { Wallet } from 'src/entities/wallet.entity';
 import { WalletService } from 'src/wallet/wallet.service';
-import { HttpService } from '@nestjs/axios';
+import { SmsModule } from 'src/sms/sms.module'; // Import the SmsModule
+import { HttpModule, HttpService } from '@nestjs/axios';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Driver, Wallet])],
+  imports: [TypeOrmModule.forFeature([Driver, Wallet]), HttpModule],
   controllers: [AuthController],
   providers: [
     AuthService,
@@ -20,7 +21,6 @@ import { HttpService } from '@nestjs/axios';
     RedisConfigService,
     WalletService,
     Logger,
-    HttpService,
   ],
 })
 export class AuthModule {}

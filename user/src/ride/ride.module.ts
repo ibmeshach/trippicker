@@ -8,10 +8,12 @@ import { UserService } from 'src/user/user.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { WalletService } from 'src/wallet/wallet.service';
 import { Wallet } from 'src/entities/wallet.entity';
+import { DriverService } from 'src/driver/driver.service';
+import { Driver } from 'src/entities/driver.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Ride, Wallet]),
+    TypeOrmModule.forFeature([User, Ride, Wallet, Driver]),
     ClientsModule.register([
       {
         name: 'DRIVERS',
@@ -23,7 +25,7 @@ import { Wallet } from 'src/entities/wallet.entity';
       },
     ]),
   ],
-  providers: [RideService, UserService, WalletService],
+  providers: [RideService, UserService, WalletService, DriverService],
   controllers: [RideController],
 })
 export class RideModule {}

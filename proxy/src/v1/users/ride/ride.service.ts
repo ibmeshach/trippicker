@@ -44,6 +44,7 @@ export class RideService {
   }
 
   async cancelRide(body: CancelRideProps) {
+    console.log('get here', body);
     const observableData = this.usersClient
       .send('user.cancelRide', new CancelRideEvent(body))
       .pipe(
@@ -51,5 +52,7 @@ export class RideService {
           throw error;
         }),
       );
+
+    await firstValueFrom(observableData);
   }
 }
