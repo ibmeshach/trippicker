@@ -12,11 +12,7 @@ import { SmsModule } from 'src/sms/sms.module'; // Import the SmsModule
 import { HttpModule, HttpService } from '@nestjs/axios';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Driver, Wallet]),
-    SmsModule, // Include SmsModule here
-    HttpModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Driver, Wallet]), HttpModule],
   controllers: [AuthController],
   providers: [
     AuthService,
