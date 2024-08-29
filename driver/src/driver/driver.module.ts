@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { DriverService } from './driver.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Driver } from 'src/entities/driver.entity';
@@ -21,7 +21,7 @@ import { HttpModule } from '@nestjs/axios';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          host: 'users-nestjs-backend.railway.internal',
+          // host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },

@@ -15,16 +15,84 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { catchError, firstValueFrom } from 'rxjs';
 import { EndTripEvent, StartTripEvent } from './ride.event';
 import { UserService } from 'src/user/user.service';
+import { DataSource, QueryRunner } from 'typeorm';
+import { User } from 'src/entities/user.entity';
 
 @Controller('ride')
 export class RideController {
+  private queryRunner: QueryRunner;
+
   constructor(
+    private dataSource: DataSource,
     private readonly rideService: RideService,
     private readonly driverService: DriverService,
     private readonly walletService: WalletService,
     private readonly userService: UserService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
-  ) {}
+  ) {
+    this.queryRunner = this.dataSource.createQueryRunner();
+  }
+
+  @MessagePattern('driver.acceptedRide')
+  async acceptedRide(@Payload() { data }: { data: DriverRideResponseProps }) {
+    await this.queryRunner.connect();
+    await this.queryRunner.startTransaction();
+
+    try {
+      if (!data.action)
+        throw new CustomException(
+          'Driver has not accepted the ride',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      let user = await this.userService.findUserByPhoneNumberLock(
+        data.user.phoneNumber,
+        this.queryRunner.manager,
+      );
+
+      delete data.user.id;
+      if (!user) {
+        // Create a new user if it does not exist
+        user = this.queryRunner.manager.create(User, data.user);
+        await this.queryRunner.manager.save(user);
+      } else {
+        // Update the existing user if needed
+        await this.queryRunner.manager.update(
+          User,
+          { phoneNumber: data.user.phoneNumber },
+          data.user,
+        );
+      }
+
+      const driver = await this.driverService.findDriverById(data.driver.id);
+
+      const createRideData = {
+        ...data,
+        userPhoneNumber: user.phoneNumber,
+        driverPhoneNumber: driver.phoneNumber,
+        duration: data.duration.toString(),
+        distance: data.range,
+      };
+
+      const ride = this.queryRunner.manager.create(Ride, createRideData);
+      await this.queryRunner.manager.save(ride);
+      await this.queryRunner.manager.save(user);
+
+      await this.queryRunner.commitTransaction();
+      return ride;
+    } catch (err) {
+      console.log('error', err);
+      await this.queryRunner.rollbackTransaction();
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
 
   @MessagePattern('driver.trackRide')
   @UseInterceptors(ClassSerializerInterceptor)

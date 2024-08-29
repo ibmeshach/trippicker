@@ -8,7 +8,6 @@ import { SmsService } from 'src/sms/sms.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RideService } from 'src/ride/ride.service';
 import { Ride } from 'src/entities/rides.entity';
-import { ChatMessage } from 'src/entities/chatMessage.entity';
 import { HttpModule } from '@nestjs/axios';
 import { Driver } from 'src/entities/driver.entity';
 import { DriverService } from 'src/driver/driver.service';
@@ -21,7 +20,7 @@ import { DriverService } from 'src/driver/driver.service';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

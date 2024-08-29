@@ -7,7 +7,6 @@ import {
   GetRideEvent,
   GetRidesEvent,
 } from './ride.events';
-import { GatewayService } from 'src/v1/gateway/gateway.service';
 import { EventsService } from 'src/v1/events/events.service';
 
 @Injectable()
@@ -16,7 +15,7 @@ export class RideService {
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
     @Inject('USERS') private readonly usersClient: ClientProxy,
     @Inject(forwardRef(() => EventsService))
-    private readonly eventsService: EventsService,
+    private readonly eventsService: EventsService
   ) {}
 
   async requestRide(body: RideRequestProps) {
@@ -27,12 +26,12 @@ export class RideService {
           userId: body.id,
           origin: body.origin,
           driverId: body.driverId,
-        }),
+        })
       )
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     const { user, driver } = await firstValueFrom(observableData);
@@ -55,9 +54,9 @@ export class RideService {
     const observableData = this.usersClient
       .send('user.cancelRide', new CancelRideEvent(body))
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     await firstValueFrom(observableData);
@@ -67,9 +66,9 @@ export class RideService {
     const observableData = this.usersClient
       .send('user.rideHistories', new GetRidesEvent(body))
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     const data = await firstValueFrom(observableData);
@@ -81,9 +80,9 @@ export class RideService {
     const observableData = this.usersClient
       .send('user.rideDetails', new GetRideEvent(body))
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     const data = await firstValueFrom(observableData);

@@ -20,7 +20,7 @@ import { UserService } from 'src/user/user.service';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          host: 'users-nestjs-backend.railway.internal',
+          // host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
