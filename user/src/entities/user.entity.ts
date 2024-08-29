@@ -29,26 +29,20 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   address?: string;
 
-  @Column({ nullable: true, default: 0 }) // rating can be between  1 and  5
+  @Column({ nullable: true }) // rating can be between  1 and  5
   rating?: number;
 
-  @Column({ nullable: false, default: 0 })
+  @Column({ nullable: true })
   noOfRating: number; // the no of drivers that have rated this user
 
   @Column({ nullable: true })
   profileImage?: string;
-
-  @Column({ nullable: true })
-  currentAddress?: string;
 
   @Column({ type: 'float', nullable: true })
   currentLatitude: number;
 
   @Column({ type: 'float', nullable: true })
   currentLongitude: number;
-
-  @Column({ type: 'float', nullable: false, default: 0.0 })
-  coinMined: number;
 
   @OneToOne(() => Wallet)
   coinWallet: Wallet;

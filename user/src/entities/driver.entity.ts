@@ -56,6 +56,9 @@ export class Driver extends BaseModel {
   @Column({ default: 0 })
   totalEarnings: number;
 
+  @Column({ default: 0 })
+  noOfRating: number; // the no of users that have rated this user
+
   @Column({ default: false })
   isPhoneNumberConfirmed: boolean;
 

@@ -34,9 +34,6 @@ export class Driver extends BaseModel {
   @Column({ nullable: true })
   address: string;
 
-  @Column({ nullable: true })
-  currentAddress?: string;
-
   @Column({ type: 'float', nullable: true })
   currentLatitude: number;
 

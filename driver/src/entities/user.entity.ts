@@ -30,6 +30,9 @@ export class User extends BaseModel {
   rating?: number;
 
   @Column({ nullable: true })
+  noOfRating: number; // the no of user that have rated this driver
+
+  @Column({ nullable: true })
   profileImage?: string;
 
   @Column({ type: 'float', nullable: true })

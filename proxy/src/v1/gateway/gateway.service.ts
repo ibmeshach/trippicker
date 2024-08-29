@@ -199,7 +199,12 @@ export class GatewayService implements OnModuleInit {
 
   @SubscribeMessage('driver.driverRideResponse')
   async driverRideResponse(@MessageBody() data: DriverRideResponseProps) {
+    console.log('user', data.user);
+    console.log('ACTION', data.action);
+    console.log('driver', data.driver);
+    console.log('data', data.user);
     const userId = data.user.id;
+
     const currentRetryCount = this.retryCounts.get(userId) || 0;
     const rideId = this.generateRideId();
 
