@@ -65,7 +65,7 @@ export class RideController {
     return 'Success';
   }
 
-  @Get()
+  @Get('all')
   @ApiResponse({
     status: 200,
     description: 'Fetched rides',

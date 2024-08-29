@@ -332,4 +332,49 @@ export class RideController {
       }
     }
   }
+
+  @MessagePattern('driver.rideHistories')
+  async getRides(
+    @Payload() { data }: { data: { driverId: string; rideId: string } },
+  ) {
+    try {
+      const driver = await this.driverService.findDriverById(data.driverId);
+
+      if (!driver)
+        throw new CustomException(
+          'driver with driverId not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const rides = await this.rideService.getRideHistories(driver.phoneNumber);
+      return rides;
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.rideDetails')
+  async getRideDetails(@Payload() { data }: { data: { rideId: string } }) {
+    try {
+      const ride = await this.rideService.getRideDetails(data.rideId);
+      return ride;
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
 }

@@ -299,4 +299,48 @@ export class RideController {
       }
     }
   }
+
+  @MessagePattern('user.rideHistories')
+  async rideHistory(
+    @Payload() { data }: { data: { userId: string; rideId: string } },
+  ) {
+    try {
+      const user = await this.userService.findUserById(data.userId);
+
+      if (!user)
+        throw new CustomException(
+          'user with userId not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const rides = await this.rideService.getRideHistories(user.phoneNumber);
+      return rides;
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.rideDetails')
+  async getRideDetails(@Payload() { data }: { data: { rideId: string } }) {
+    try {
+      const ride = await this.rideService.getRideDetails(data.rideId);
+      return ride;
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
 }

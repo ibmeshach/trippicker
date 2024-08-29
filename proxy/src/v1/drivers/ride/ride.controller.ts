@@ -42,7 +42,7 @@ export class RideController {
   })
   async arriveTrip(
     @Body() body: ArrivedTripDto,
-    @Req() req: Request,
+    @Req() req: Request
   ): Promise<any> {
     const userId = req['user'].sub;
 
@@ -66,7 +66,7 @@ export class RideController {
   })
   async startTrip(
     @Body() body: StartTripProps,
-    @Req() req: Request,
+    @Req() req: Request
   ): Promise<any> {
     const userId = req['user'].sub;
 
@@ -78,7 +78,7 @@ export class RideController {
     return 'Success';
   }
 
-  @Get()
+  @Get('all')
   @ApiResponse({
     status: 200,
     description: 'Fetched rides',
@@ -102,7 +102,7 @@ export class RideController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async getRide(
     @Req() req: Request,
-    @Query('rideId') rideId: string,
+    @Query('rideId') rideId: string
   ): Promise<any> {
     const userId = req['user'].sub;
 
