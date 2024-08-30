@@ -4,4 +4,4 @@ import { RatingController } from './rating.controller';
 @Module({
   controllers: [RatingController],
 })
-export class UserRatingModule {}
+export class DriverRatingModule {}

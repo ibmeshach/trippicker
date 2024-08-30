@@ -21,7 +21,8 @@ import { ChatsModule } from './v1/chats/chats.module';
 import { DriverRideModule } from './v1/drivers/ride/ride.module';
 import { UsersModule } from './v1/users/users/users.module';
 import { DriversModule } from './v1/drivers/drivers/drivers.module';
-import { RatingModule } from './v1/users/rating/rating.module';
+import { DriverRatingModule } from './v1/drivers/rating/rating.module';
+import { UserRatingModule } from './v1/users/rating/rating.module';
 
 @Module({
   imports: [
@@ -67,7 +68,8 @@ import { RatingModule } from './v1/users/rating/rating.module';
     ChatsModule,
     UsersModule,
     DriversModule,
-    RatingModule,
+    DriverRatingModule,
+    UserRatingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
