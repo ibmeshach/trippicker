@@ -1,16 +1,7 @@
-import {
-  Body,
-  Controller,
-  HttpException,
-  HttpStatus,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto, ResendOtpDto, SignUpDto, VerifyOtpDto } from './auth.dto';
-import { CustomException } from 'src/custom.exception';
-import { Request } from 'express';
 
 @ApiTags('user-authentication')
 @Controller('v1/users/auth')

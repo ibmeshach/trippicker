@@ -39,54 +39,61 @@ export class GatewayService implements OnModuleInit {
     @Inject('DRIVERS') private readonly driversClient: ClientProxy,
     private readonly mapsService: MapsService,
     private readonly rideService: RideService,
-    private readonly eventsService: EventsService,
+    private readonly eventsService: EventsService
   ) {}
 
   onModuleInit() {
-    this.eventsService.rideRequested$.subscribe((payload) => {
+    this.eventsService.rideRequested$.subscribe(payload => {
       this.requestRide(payload);
     });
   }
   @WebSocketServer() server: Server;
 
   @SubscribeMessage('trackRide')
-  async trackRide(@MessageBody() data: { rideId: string }) {
+  async trackRide(@MessageBody() data: any) {
+    let parsedData: { rideId: string };
+    if (typeof data == 'string') {
+      parsedData = JSON.parse(data);
+    } else {
+      parsedData = data;
+    }
+
     const observableDriverDetails = this.driversClient
       .send(
         'driver.trackRide',
         new TrackRideEvent({
-          rideId: data.rideId,
-        }),
+          rideId: parsedData.rideId,
+        })
       )
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     const observableUserDetails = this.usersClient
       .send(
         'user.trackRide',
         new TrackRideEvent({
-          rideId: data.rideId,
-        }),
+          rideId: parsedData.rideId,
+        })
       )
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     const driverDetails = await firstValueFrom(observableDriverDetails);
     const userDetails = await firstValueFrom(observableUserDetails);
 
-    this.server.emit(`trackRide:${data.rideId}:${driverDetails.id}`, {
+    this.server.emit(`trackRide:${parsedData.rideId}:${driverDetails.id}`, {
       ride: driverDetails.ride,
       driverLocatin: driverDetails.location,
       userLocation: userDetails.location,
     });
 
-    this.server.emit(`trackRide:${data.rideId}:${userDetails.id}`, {
+    this.server.emit(`trackRide:${parsedData.rideId}:${userDetails.id}`, {
       ride: driverDetails.ride,
       driverLocatin: driverDetails.location,
       userLocation: userDetails.location,
@@ -95,9 +102,16 @@ export class GatewayService implements OnModuleInit {
 
   @SubscribeMessage('user.updateLocation')
   async userUpdateLocation(
-    @MessageBody() data: Partial<UpdateLocationsProps>,
-    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: any,
+    @ConnectedSocket() socket: Socket
   ) {
+    let parsedData: Partial<UpdateLocationsProps>;
+    if (typeof data == 'string') {
+      parsedData = JSON.parse(data);
+    } else {
+      parsedData = data;
+    }
+
     const token = socket.handshake.headers['authorization'];
 
     const observable = this.usersClient
@@ -105,15 +119,15 @@ export class GatewayService implements OnModuleInit {
         'user.updateLocation',
         new UpdateUserLocationEvent({
           token,
-          address: data.address,
-          currentLatitude: data.currentLatitude,
-          currentLongitude: data.currentLongitude,
-        }),
+          address: parsedData.address,
+          currentLatitude: parsedData.currentLatitude,
+          currentLongitude: parsedData.currentLongitude,
+        })
       )
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
 
     const value = await firstValueFrom(observable);
@@ -128,27 +142,35 @@ export class GatewayService implements OnModuleInit {
   }
 
   @SubscribeMessage('user.partialRideDetails')
-  async getPartialRideDetails(@MessageBody() data: PartialRideDetailsProps) {
+  async getPartialRideDetails(@MessageBody() data: any) {
+    let parsedData: PartialRideDetailsProps;
+
+    if (typeof data == 'string') {
+      parsedData = JSON.parse(data);
+    } else {
+      parsedData = data;
+    }
+
     try {
       const driversObservable = this.driversClient
         .send(
           'driver.getNearestDrivers',
           new GetNearestDriversEvent({
-            maxDistance: data.distance,
-            userLatitude: data.origin.lat,
-            userLongitude: data.origin.lng,
-          }),
+            maxDistance: parsedData.distance,
+            userLatitude: parsedData.origin.lat,
+            userLongitude: parsedData.origin.lng,
+          })
         )
         .pipe(
-          catchError((error) => {
+          catchError(error => {
             throw error;
-          }),
+          })
         );
 
       const drivers = await firstValueFrom(driversObservable);
       const rideDetails = await this.mapsService.getRideDetails(
-        data.origin,
-        data.destination,
+        parsedData.origin,
+        parsedData.destination
       );
 
       console.log('partialrides', {
@@ -163,8 +185,8 @@ export class GatewayService implements OnModuleInit {
         duration: rideDetails.duration,
         range: rideDetails.distance,
         cost: rideDetails.cost,
-        originAddress: data.originAddress,
-        destinationAddresses: data.destinationAddresses,
+        originAddress: parsedData.originAddress,
+        destinationAddresses: parsedData.destinationAddresses,
       };
     } catch (error) {
       throw error;
@@ -175,9 +197,16 @@ export class GatewayService implements OnModuleInit {
 
   @SubscribeMessage('driver.updateLocation')
   async driverUpdateLocation(
-    @MessageBody() data: Partial<UpdateLocationsProps>,
-    @ConnectedSocket() socket: Socket,
+    @MessageBody() data: string,
+    @ConnectedSocket() socket: Socket
   ) {
+    let parsedData: Partial<UpdateLocationsProps>;
+
+    if (typeof data == 'string') {
+      parsedData = JSON.parse(data);
+    } else {
+      parsedData = data;
+    }
     const token = socket.handshake.headers['authorization'];
 
     return this.driversClient
@@ -185,58 +214,60 @@ export class GatewayService implements OnModuleInit {
         'driver.updateLocation',
         new UpdateDriverLocationEvent({
           token,
-          address: data.address,
-          currentLatitude: data.currentLatitude,
-          currentLongitude: data.currentLongitude,
-        }),
+          address: parsedData.address,
+          currentLatitude: parsedData.currentLatitude,
+          currentLongitude: parsedData.currentLongitude,
+        })
       )
       .pipe(
-        catchError((error) => {
+        catchError(error => {
           throw error;
-        }),
+        })
       );
   }
 
   @SubscribeMessage('driver.driverRideResponse')
-  async driverRideResponse(@MessageBody() data: DriverRideResponseProps) {
-    console.log('user', data.user);
-    console.log('ACTION', data.action);
-    console.log('driver', data.driver);
-    console.log('data', data.user);
-    const userId = data.user.id;
+  async driverRideResponse(@MessageBody() data: string) {
+    let parsedData: DriverRideResponseProps;
 
+    if (typeof data == 'string') {
+      parsedData = JSON.parse(data);
+    } else {
+      parsedData = data;
+    }
+
+    const userId = parsedData.user.id;
     const currentRetryCount = this.retryCounts.get(userId) || 0;
     const rideId = this.generateRideId();
 
-    if (data.action) {
+    if (parsedData.action) {
       this.retryCounts.set(userId, 0);
       const observableDriverRide = this.driversClient
         .send(
           'driver.acceptedRide',
           new BookRideEvent({
             rideId,
-            ...data,
-          }),
+            ...parsedData,
+          })
         )
         .pipe(
-          catchError((error) => {
+          catchError(error => {
             throw error;
-          }),
+          })
         );
 
       const observableUserRide = this.usersClient
-        .send('user.acceptedRide', new BookRideEvent({ rideId, ...data }))
+        .send('user.acceptedRide', new BookRideEvent({ rideId, ...parsedData }))
         .pipe(
-          catchError((error) => {
+          catchError(error => {
             throw error;
-          }),
+          })
         );
 
       const driverRide = await firstValueFrom(observableDriverRide);
       const userRide = await firstValueFrom(observableUserRide);
 
       this.requestRideResponse(userRide);
-
       return driverRide;
     } else {
       if (currentRetryCount < 3) {
@@ -244,14 +275,14 @@ export class GatewayService implements OnModuleInit {
 
         return await this.rideService.requestRide({
           id: userId,
-          driverId: data.driver.id,
-          cost: data.cost,
-          range: data.range,
-          duration: data.duration,
-          origin: data.origin,
-          destination: data.destination,
-          originAddress: data.originAddress,
-          destinationAddresses: data.destinationAddresses,
+          driverId: parsedData.driver.id,
+          cost: parsedData.cost,
+          range: parsedData.range,
+          duration: parsedData.duration,
+          origin: parsedData.origin,
+          destination: parsedData.destination,
+          originAddress: parsedData.originAddress,
+          destinationAddresses: parsedData.destinationAddresses,
         });
       } else {
         this.retryCounts.set(userId, 0);

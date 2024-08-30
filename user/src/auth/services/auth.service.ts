@@ -91,6 +91,7 @@ export class AuthService {
 
       const userResponse = new UserEntity(updatedUser);
 
+      console.log({ user: userResponse });
       return 'login successfully, otp sent';
     } catch (err) {
       throw err;

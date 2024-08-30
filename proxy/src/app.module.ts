@@ -74,7 +74,7 @@ export class AppModule implements NestModule {
         { path: 'v1/users/auth/resend-otp', method: RequestMethod.POST },
         { path: 'v1/drivers/auth/login', method: RequestMethod.POST },
         { path: 'v1/drivers/auth/verify-otp', method: RequestMethod.POST },
-        { path: 'v1/drivers/auth/resend-otp', method: RequestMethod.POST },
+        { path: 'v1/drivers/auth/resend-otp', method: RequestMethod.POST }
       )
       .forRoutes('v1/*');
   }

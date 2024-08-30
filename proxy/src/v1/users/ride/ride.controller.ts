@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
 import { RideService } from './ride.service';
-import { ApiBody, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CancelRideDto, RequestRideDto } from './ride.dto';
 import { Request } from 'express';
 
@@ -21,7 +21,7 @@ export class RideController {
   })
   async requestRide(
     @Body() body: RequestRideDto,
-    @Req() req: Request,
+    @Req() req: Request
   ): Promise<any> {
     const userId = req['user'].sub;
 
@@ -52,7 +52,7 @@ export class RideController {
   })
   async cancelRide(
     @Body() body: CancelRideDto,
-    @Req() req: Request,
+    @Req() req: Request
   ): Promise<any> {
     const userId = req['user'].sub;
 
@@ -89,7 +89,7 @@ export class RideController {
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   async getRide(
     @Req() req: Request,
-    @Query('rideId') rideId: string,
+    @Query('rideId') rideId: string
   ): Promise<any> {
     const userId = req['user'].sub;
 

@@ -1,4 +1,4 @@
-import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -67,13 +67,11 @@ import { WalletModule } from './wallet/wallet.module';
   controllers: [AppController],
   providers: [AppService, Logger, UserService],
 })
-export class AppModule implements NestModule {
+export class AppModule {
   constructor(
     private dataSource: DataSource,
     private logger: Logger,
   ) {}
-
-  configure(consumer: MiddlewareConsumer) {}
 
   async onModuleInit() {
     if (!this.dataSource.isInitialized) {

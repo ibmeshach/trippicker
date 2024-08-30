@@ -29,10 +29,10 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   address?: string;
 
-  @Column({ nullable: true }) // rating can be between  1 and  5
+  @Column({ default: 0 }) // rating can be between  1 and  5
   rating?: number;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   noOfRating: number; // the no of drivers that have rated this user
 
   @Column({ nullable: true })

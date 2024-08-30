@@ -52,7 +52,7 @@ export class Driver extends BaseModel {
   rating?: number;
 
   @Column({ nullable: false, default: 0 })
-  noOfRating: number; // the no of users that have rated this user
+  noOfRating: number; // the no of users that have rated this driver
 
   @Column({ default: 0 })
   numberOfRides: number;

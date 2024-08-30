@@ -26,8 +26,11 @@ export class ChatsController {
   @MessagePattern('driver.saveChatMessage')
   @UseInterceptors(ClassSerializerInterceptor)
   async saveChatMessage(@Payload() { data }: { data: SaveChatMessageProps }) {
+    console.log(data, 'data');
     try {
       const ride = await this.rideService.findRideByRideId(data.rideId);
+
+      console.log(ride);
 
       const createChatData = {
         owner: data.role === 'driver' ? true : false,

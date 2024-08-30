@@ -19,7 +19,7 @@ import { Driver } from 'src/entities/driver.entity';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          host: 'drivers-nestjs-backend.railway.internal',
+          // host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

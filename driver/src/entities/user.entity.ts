@@ -29,8 +29,8 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   rating?: number;
 
-  @Column({ nullable: true })
-  noOfRating: number; // the no of user that have rated this driver
+  @Column({ default: 0 })
+  noOfRating: number; // the no of drivers that have rated this user
 
   @Column({ nullable: true })
   profileImage?: string;
