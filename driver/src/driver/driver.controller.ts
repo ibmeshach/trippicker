@@ -17,12 +17,17 @@ import {
   DriverProfileDetail,
 } from './serializers/driver.serializer';
 import { plainToClass } from 'class-transformer';
+import { RideService } from 'src/ride/ride.service';
+import { UserService } from 'src/user/user.service';
+import { RateUserEvent } from './drivers.event';
 
 @Controller('driver')
 export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
+    private readonly rideService: RideService,
+    private readonly userService: UserService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {}
 
@@ -130,8 +135,50 @@ export class DriverController {
   }
 
   @MessagePattern('driver.rateDriver')
-  async getAllChatMessages(
-    @Payload() { data }: { data: { rating: number; driverId: string } },
+  async rateDriver(
+    @Payload()
+    { data }: { data: { rating: number; phoneNumber: string; rideId: string } },
+  ) {
+    try {
+      const driver = await this.driverService.findDriverByPhoneNumber(
+        data.phoneNumber,
+      );
+
+      if (!driver)
+        throw new CustomException(
+          'Enter a valid driverId',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const ride = await this.rideService.findRideByRideId(data.rideId);
+
+      ride.driverRating = data.rating;
+      ride.save();
+
+      const oldRating = driver.rating;
+      const averageRating = (oldRating + data.rating) / (driver.noOfRating + 1);
+      driver.rating = averageRating;
+      driver.noOfRating += 1;
+      await driver.save();
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.rateUser')
+  async rateUser(
+    @Payload()
+    { data }: { data: { rating: number; driverId: string; rideId: string } },
   ) {
     try {
       const driver = await this.driverService.findDriverById(data.driverId);
@@ -142,12 +189,43 @@ export class DriverController {
           HttpStatus.NOT_FOUND,
         );
 
-      const oldRating = driver.rating;
+      const ride = await this.rideService.findRideByRideId(data.rideId);
 
-      const averageRating = (oldRating + data.rating) / (driver.noOfRating + 1);
-      driver.rating = averageRating;
-      driver.noOfRating += 1;
-      await driver.save();
+      if (driver.phoneNumber !== ride.driverPhoneNumber)
+        throw new CustomException(
+          'Wrong driver for rating this user',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      ride.userRating = data.rating;
+      ride.save();
+
+      const user = await this.userService.findUserByPhoneNumber(
+        ride.userPhoneNumber,
+      );
+
+      const oldRating = user.rating;
+      const averageRating = (oldRating + data.rating) / (user.noOfRating + 1);
+      user.rating = averageRating;
+      user.noOfRating += 1;
+      await user.save();
+
+      const observableData = this.usersClient
+        .send(
+          'user.rateUser',
+          new RateUserEvent({
+            rating: data.rating,
+            phoneNumber: ride.userPhoneNumber,
+            rideId: data.rideId,
+          }),
+        )
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      await firstValueFrom(observableData);
 
       return { status: true };
     } catch (err) {

@@ -3,20 +3,28 @@ import {
   Controller,
   HttpException,
   HttpStatus,
+  Inject,
   UseInterceptors,
 } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity, UserProfileDetail } from './serializers/user.serializer';
 import { plainToClass } from 'class-transformer';
+import { RideService } from 'src/ride/ride.service';
+import { DriverService } from 'src/driver/driver.service';
+import { catchError, firstValueFrom } from 'rxjs';
+import { RateUserEvent } from './user.events';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly configService: ConfigService,
+    private readonly rideService: RideService,
+    private readonly driverService: DriverService,
+    @Inject('DRIVERS') private readonly driverClient: ClientProxy,
   ) {}
 
   @MessagePattern('user.updateLocation')
@@ -91,8 +99,50 @@ export class UserController {
   }
 
   @MessagePattern('user.rateUser')
-  async getAllChatMessages(
-    @Payload() { data }: { data: { rating: number; userId: string } },
+  async rateUser(
+    @Payload()
+    { data }: { data: { rating: number; phoneNumber: string; rideId: string } },
+  ) {
+    try {
+      const user = await this.userService.findUserByPhoneNumber(
+        data.phoneNumber,
+      );
+
+      if (!user)
+        throw new CustomException(
+          'Enter a valid user phoneNumber',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const ride = await this.rideService.findRideByRideId(data.rideId);
+
+      ride.userRating = data.rating;
+      ride.save();
+
+      const oldRating = user.rating;
+      const averageRating = (oldRating + data.rating) / (user.noOfRating + 1);
+      user.rating = averageRating;
+      user.noOfRating += 1;
+      await user.save();
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.rateDriver')
+  async rateDriver(
+    @Payload()
+    { data }: { data: { rating: number; userId: string; rideId: string } },
   ) {
     try {
       const user = await this.userService.findUserById(data.userId);
@@ -100,12 +150,43 @@ export class UserController {
       if (!user)
         throw new CustomException('Enter a valid userId', HttpStatus.NOT_FOUND);
 
-      const oldRating = user.rating;
+      const ride = await this.rideService.findRideByRideId(data.rideId);
 
-      const averageRating = (oldRating + data.rating) / (user.noOfRating + 1);
-      user.rating = averageRating;
-      user.noOfRating += 1;
-      await user.save();
+      if (user.phoneNumber !== ride.userPhoneNumber)
+        throw new CustomException(
+          'Wrong user for rating this driver',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      ride.driverRating = data.rating;
+      ride.save();
+
+      const driver = await this.driverService.findDriverByPhoneNumber(
+        ride.driverPhoneNumber,
+      );
+
+      const oldRating = driver.rating;
+      const averageRating = (oldRating + data.rating) / (driver.noOfRating + 1);
+      driver.rating = averageRating;
+      driver.noOfRating += 1;
+      await driver.save();
+
+      const observableData = this.driverClient
+        .send(
+          'driver.rateDriver',
+          new RateUserEvent({
+            rating: data.rating,
+            phoneNumber: ride.driverPhoneNumber,
+            rideId: data.rideId,
+          }),
+        )
+        .pipe(
+          catchError((error) => {
+            throw error;
+          }),
+        );
+
+      await firstValueFrom(observableData);
 
       return { status: true };
     } catch (err) {
