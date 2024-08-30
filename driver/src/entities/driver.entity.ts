@@ -66,6 +66,9 @@ export class Driver extends BaseModel {
   @Column({ default: false })
   isPhoneNumberConfirmed: boolean;
 
+  @Column({ default: false })
+  isEmailConfirmed: boolean;
+
   @OneToMany(() => Ride, (ride) => ride.driver, {
     onDelete: 'CASCADE',
   })

@@ -17,6 +17,9 @@ export class User extends BaseModel {
   @Column({ default: false })
   isPhoneNumberConfirmed: boolean;
 
+  @Column({ default: false })
+  isEmailConfirmed: boolean;
+
   @Column({ nullable: true })
   email?: string;
 

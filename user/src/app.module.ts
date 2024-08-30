@@ -32,6 +32,9 @@ import { WalletModule } from './wallet/wallet.module';
         OTP_JWT_TOKEN: Joi.string().required(),
         TERMII_BASE_URL: Joi.string().required(),
         TERMII_API_KEY: Joi.string().required(),
+        CLOUDINARY_API_SECRET: Joi.string().required(),
+        CLOUDINARY_API_KEY: Joi.string().required(),
+        CLOUDINARY_CLOUD_NAME: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({

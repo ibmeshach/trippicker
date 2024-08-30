@@ -19,6 +19,8 @@ import { GatewayModule } from './v1/gateway/gateway.module';
 import { EventsModule } from './v1/events/events.module';
 import { ChatsModule } from './v1/chats/chats.module';
 import { DriverRideModule } from './v1/drivers/ride/ride.module';
+import { UsersModule } from './v1/users/users/users.module';
+import { DriversModule } from './v1/drivers/drivers/drivers.module';
 
 @Module({
   imports: [
@@ -48,6 +50,9 @@ import { DriverRideModule } from './v1/drivers/ride/ride.module';
       validationSchema: Joi.object({
         GOOGLE_MAPS_API_KEY: Joi.string().required(),
         JWT_ACCESS_TOKEN: Joi.string().required(),
+        CLOUDINARY_API_SECRET: Joi.string().required(),
+        CLOUDINARY_API_KEY: Joi.string().required(),
+        CLOUDINARY_CLOUD_NAME: Joi.string().required(),
       }),
     }),
 
@@ -59,6 +64,8 @@ import { DriverRideModule } from './v1/drivers/ride/ride.module';
     DriverRideModule,
     EventsModule,
     ChatsModule,
+    UsersModule,
+    DriversModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -74,7 +81,7 @@ export class AppModule implements NestModule {
         { path: 'v1/users/auth/resend-otp', method: RequestMethod.POST },
         { path: 'v1/drivers/auth/login', method: RequestMethod.POST },
         { path: 'v1/drivers/auth/verify-otp', method: RequestMethod.POST },
-        { path: 'v1/drivers/auth/resend-otp', method: RequestMethod.POST },
+        { path: 'v1/drivers/auth/resend-otp', method: RequestMethod.POST }
       )
       .forRoutes('v1/*');
   }

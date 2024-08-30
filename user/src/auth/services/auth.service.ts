@@ -147,7 +147,7 @@ export class AuthService {
     const otpCode = await this.smsService.sendOtp(user.phoneNumber);
     const token = await this.encodeOptCodeInToken(user.id, otpCode);
 
-    const updatedUser = await this.userService.updateOtpToken({
+    await this.userService.updateOtpToken({
       phoneNumber: body.phoneNumber,
       otpToken: token,
     });
@@ -155,11 +155,70 @@ export class AuthService {
     if (user) return 'otp sent';
   }
 
-  async verifyEmailOtpCode(data: VerifyEmailOtpCodeProps) {}
+  async verifyEmailOtpCode(data: VerifyEmailOtpCodeProps) {
+    const user = await this.userService.findUserByEmail(data.email);
 
-  async sendEmailOtp(data: sendEmailOtpCodeProps) {}
+    if (!user)
+      throw new CustomException(
+        'User not found with phoneNumber',
+        HttpStatus.NOT_FOUND,
+      );
 
-  async generateToken(payload: {}, secret: string, expire_time: string | null) {
+    const otp_secret = this.configService.get('OTP_JWT_TOKEN');
+    const payload = await this.decodejwtToken(user.otpToken, otp_secret);
+
+    if (!payload)
+      throw new CustomException(
+        'Invalid or expired otp code',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (!(data.otpCode == payload.otpCode))
+      throw new CustomException(
+        'Wrong otp code provided',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    user.isEmailConfirmed = true;
+    user.save();
+
+    return { status: true };
+  }
+
+  async sendEmailOtp(data: sendEmailOtpCodeProps) {
+    const user = await this.userService.findUserByEmail(data.email);
+
+    if (!user)
+      throw new CustomException(
+        'User with email not found',
+        HttpStatus.NOT_FOUND,
+      );
+
+    const otpCode = this.generateOTPCode(4);
+    const token = await this.encodeOptCodeInToken(user.id, otpCode);
+
+    await this.userService.updateOtpToken({
+      phoneNumber: user.phoneNumber,
+      otpToken: token,
+    });
+  }
+
+  generateOTPCode(length: number) {
+    const characters = '0123456789';
+    let otpCode = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      otpCode += characters.charAt(randomIndex);
+    }
+    return otpCode;
+  }
+
+  async generateToken(
+    payload: { sub: string; otpCode?: string },
+    secret: string,
+    expire_time: string | null,
+  ) {
     const options: { secret: string; expiresIn?: string } = { secret };
 
     if (expire_time) {

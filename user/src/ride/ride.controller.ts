@@ -17,6 +17,8 @@ import { CancelRideEvent } from './ride.events';
 import { DriverService } from 'src/driver/driver.service';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Driver } from 'src/entities/driver.entity';
+import { RideSerializer } from './serializers/ride.serializer';
+import { plainToClass } from 'class-transformer';
 
 @Controller('ride')
 export class RideController {
@@ -314,7 +316,10 @@ export class RideController {
         );
 
       const rides = await this.rideService.getRideHistories(user.phoneNumber);
-      return rides;
+      return rides.map((ride) => {
+        const response = plainToClass(RideSerializer, ride);
+        return response;
+      });
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;
@@ -331,7 +336,8 @@ export class RideController {
   async getRideDetails(@Payload() { data }: { data: { rideId: string } }) {
     try {
       const ride = await this.rideService.getRideDetails(data.rideId);
-      return ride;
+      const response = plainToClass(RideSerializer, ride);
+      return response;
     } catch (err) {
       if (err instanceof CustomException) {
         throw err;
