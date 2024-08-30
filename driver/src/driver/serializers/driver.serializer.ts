@@ -8,3 +8,12 @@ export class DriverEntity {
     Object.assign(this, partial);
   }
 }
+
+export class DriverProfileDetail {
+  @Exclude()
+  otpToken: string;
+
+  constructor(partial: Partial<DriverProfileDetail>) {
+    Object.assign(this, partial);
+  }
+}

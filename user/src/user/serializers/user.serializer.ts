@@ -8,3 +8,12 @@ export class UserEntity {
     Object.assign(this, partial);
   }
 }
+
+export class UserProfileDetail {
+  @Exclude()
+  otpToken: string;
+
+  constructor(partial: Partial<UserProfileDetail>) {
+    Object.assign(this, partial);
+  }
+}

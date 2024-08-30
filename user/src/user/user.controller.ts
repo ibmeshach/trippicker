@@ -9,7 +9,8 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { UserService } from './user.service';
 import { ConfigService } from '@nestjs/config';
-import { UserEntity } from './serializers/user.serializer';
+import { UserEntity, UserProfileDetail } from './serializers/user.serializer';
+import { plainToClass } from 'class-transformer';
 
 @Controller('user')
 export class UserController {
@@ -123,9 +124,36 @@ export class UserController {
   @MessagePattern('user.editProfile')
   async editProfile(@Payload() { data }: { data: EditUserProfile }) {
     try {
-      await this.userService.update(data.userId, data);
+      let profileImage: string;
 
+      if (data.file) {
+        profileImage = data.file.path;
+      }
+
+      const userId = data.userId;
+      delete data.phoneNumber;
+      delete data.userId;
+      delete data.file;
+      await this.userService.update(userId, { ...data, profileImage });
       return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.getProfileDetails')
+  async getProfileDetails(@Payload() { data }: { data: { userId: string } }) {
+    try {
+      const user = await this.userService.findUserById(data.userId);
+      return plainToClass(UserProfileDetail, user);
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {

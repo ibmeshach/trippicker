@@ -7,7 +7,6 @@ import { DriverEntity } from 'src/driver/serializers/driver.serializer';
 import { Driver } from 'src/entities/driver.entity';
 import { Wallet } from 'src/entities/wallet.entity';
 import { SmsService } from 'src/sms/sms.service';
-import { WalletService } from 'src/wallet/wallet.service';
 
 import { DataSource, QueryRunner } from 'typeorm';
 
@@ -89,7 +88,7 @@ export class AuthService {
         otpToken: token,
       });
 
-      const driverResponse = new DriverEntity(updatedDriver);
+      new DriverEntity(updatedDriver);
 
       return 'login successfully, otp sent';
     } catch (err) {
@@ -158,7 +157,70 @@ export class AuthService {
     if (updatedDriver) return 'otp sent';
   }
 
-  async generateToken(payload: {}, secret: string, expire_time: string | null) {
+  async verifyEmailOtpCode(data: VerifyEmailOtpCodeProps) {
+    const driver = await this.driverService.findDriverByEmail(data.email);
+
+    if (!driver)
+      throw new CustomException(
+        'User not found with phoneNumber',
+        HttpStatus.NOT_FOUND,
+      );
+
+    const otp_secret = this.configService.get('OTP_JWT_TOKEN');
+    const payload = await this.decodejwtToken(driver.otpToken, otp_secret);
+
+    if (!payload)
+      throw new CustomException(
+        'Invalid or expired otp code',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    if (!(data.otpCode == payload.otpCode))
+      throw new CustomException(
+        'Wrong otp code provided',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    driver.isEmailConfirmed = true;
+    driver.save();
+
+    return { status: true };
+  }
+
+  async sendEmailOtp(data: sendEmailOtpCodeProps) {
+    const driver = await this.driverService.findDriverByEmail(data.email);
+
+    if (!driver)
+      throw new CustomException(
+        'User with email not found',
+        HttpStatus.NOT_FOUND,
+      );
+
+    const otpCode = this.generateOTPCode(4);
+    const token = await this.encodeOptCodeInToken(driver.id, otpCode);
+
+    await this.driverService.updateOtpToken({
+      phoneNumber: driver.phoneNumber,
+      otpToken: token,
+    });
+  }
+
+  generateOTPCode(length: number) {
+    const characters = '0123456789';
+    let otpCode = '';
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      otpCode += characters.charAt(randomIndex);
+    }
+    return otpCode;
+  }
+
+  async generateToken(
+    payload: { sub: string; otpCode?: string },
+    secret: string,
+    expire_time: string | null,
+  ) {
     const options: { secret: string; expiresIn?: string } = { secret };
 
     if (expire_time) {

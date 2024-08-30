@@ -42,6 +42,15 @@ export class DriverService {
 
     return undefined;
   }
+  async findDriverByEmail(email: string): Promise<Driver | undefined> {
+    const driver = await this.driverRepository.findOne({
+      where: { email },
+    });
+
+    if (driver) return driver;
+
+    return undefined;
+  }
 
   async findDriverById(driverId: string): Promise<Driver | undefined> {
     const driver = await this.driverRepository.findOneBy({ id: driverId });

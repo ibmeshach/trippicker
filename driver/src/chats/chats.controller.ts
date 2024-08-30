@@ -12,7 +12,6 @@ import { DriverService } from 'src/driver/driver.service';
 import { ChatsService } from './chats.service';
 import { RideService } from 'src/ride/ride.service';
 import { ChatMessageEntity } from './serializers/chatMessage.serializer';
-import { plainToClass } from 'class-transformer';
 
 @Controller('chats')
 export class ChatsController {

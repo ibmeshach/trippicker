@@ -77,6 +77,26 @@ export class RideService {
     return await this.rideRepository.findOneBy({ rideId });
   }
 
+  async getRideHistories(driverPhoneNumber: string): Promise<Ride[]> {
+    return await this.rideRepository.find({
+      where: {
+        driverPhoneNumber,
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  async getRideDetails(rideId: string) {
+    return await this.rideRepository.findOne({
+      where: {
+        id: rideId,
+      },
+      relations: ['user'],
+    });
+  }
+
   create(createRideData: Partial<Ride>) {
     const driver = this.rideRepository.create(createRideData);
     return driver;

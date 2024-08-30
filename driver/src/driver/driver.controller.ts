@@ -12,7 +12,11 @@ import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { CustomException } from 'src/custom.exception';
 import { GetUserEvent } from './driver.events';
 import { catchError, firstValueFrom } from 'rxjs';
-import { DriverEntity } from './serializers/driver.serializer';
+import {
+  DriverEntity,
+  DriverProfileDetail,
+} from './serializers/driver.serializer';
+import { plainToClass } from 'class-transformer';
 
 @Controller('driver')
 export class DriverController {
@@ -162,9 +166,36 @@ export class DriverController {
   @MessagePattern('driver.editProfile')
   async editProfile(@Payload() { data }: { data: EditDriverProfile }) {
     try {
-      await this.driverService.update(data.userId, data);
+      let profileImage: string;
 
+      if (data.file) {
+        profileImage = data.file.path;
+      }
+
+      const userId = data.driverId;
+      delete data.phoneNumber;
+      delete data.driverId;
+      delete data.file;
+      await this.driverService.update(userId, { ...data, profileImage });
       return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('driver.getProfileDetails')
+  async getProfileDetails(@Payload() { data }: { data: { driverId: string } }) {
+    try {
+      const user = await this.driverService.findDriverById(data.driverId);
+      return plainToClass(DriverProfileDetail, user);
     } catch (err) {
       console.log(err);
       if (err instanceof CustomException) {

@@ -17,6 +17,8 @@ import { CancelRideEvent } from './ride.events';
 import { DriverService } from 'src/driver/driver.service';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Driver } from 'src/entities/driver.entity';
+import { RideSerializer } from './serializers/ride.serializer';
+import { plainToClass } from 'class-transformer';
 
 @Controller('ride')
 export class RideController {
@@ -291,6 +293,54 @@ export class RideController {
       return { status: true };
     } catch (err) {
       console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.rideHistories')
+  async rideHistory(
+    @Payload() { data }: { data: { userId: string; rideId: string } },
+  ) {
+    try {
+      const user = await this.userService.findUserById(data.userId);
+
+      if (!user)
+        throw new CustomException(
+          'user with userId not found',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const rides = await this.rideService.getRideHistories(user.phoneNumber);
+      return rides.map((ride) => {
+        const response = plainToClass(RideSerializer, ride);
+        return response;
+      });
+    } catch (err) {
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.rideDetails')
+  async getRideDetails(@Payload() { data }: { data: { rideId: string } }) {
+    try {
+      const ride = await this.rideService.getRideDetails(data.rideId);
+      const response = plainToClass(RideSerializer, ride);
+      return response;
+    } catch (err) {
       if (err instanceof CustomException) {
         throw err;
       } else {
