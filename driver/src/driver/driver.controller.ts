@@ -166,8 +166,16 @@ export class DriverController {
   @MessagePattern('driver.editProfile')
   async editProfile(@Payload() { data }: { data: EditDriverProfile }) {
     try {
-      await this.driverService.update(data.userId, data);
+      let profileImage: string;
 
+      if (data.file) {
+        profileImage = data.file.path;
+      }
+
+      const userId = data.driverId;
+      delete data.driverId;
+      delete data.file;
+      await this.driverService.update(userId, { ...data, profileImage });
       return { status: true };
     } catch (err) {
       console.log(err);
@@ -182,7 +190,7 @@ export class DriverController {
     }
   }
 
-  @MessagePattern('user.getProfileDetails')
+  @MessagePattern('driver.getProfileDetails')
   async getProfileDetails(@Payload() { data }: { data: { driverId: string } }) {
     try {
       const user = await this.driverService.findDriverById(data.driverId);

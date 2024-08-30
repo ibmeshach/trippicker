@@ -1,5 +1,5 @@
 export class EditProfileEvent {
-  constructor(public readonly data: EditUserProfile) {}
+  constructor(public readonly data: EditDriverProfile) {}
 }
 
 export class GetProfileEvent {

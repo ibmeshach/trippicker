@@ -6,7 +6,7 @@ import { EditProfileEvent, GetProfileEvent } from './users.events';
 @Injectable()
 export class UsersService {
   constructor(@Inject('USERS') private readonly usersClient: ClientProxy) {}
-  async editProfile(payload: any) {
+  async editProfile(payload: EditUserProfile) {
     const observableData = this.usersClient
       .send('user.editProfile', new EditProfileEvent(payload))
       .pipe(

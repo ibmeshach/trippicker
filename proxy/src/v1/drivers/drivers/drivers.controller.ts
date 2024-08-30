@@ -33,17 +33,17 @@ export class DriversController {
     @Body() body: EditDriverProfileDto,
     @Req() req: Request
   ): Promise<any> {
-    const userId = req['user'].sub;
+    const driverId = req['user'].sub;
 
     const payload = {
-      userId,
+      driverId,
       ...body,
       file,
     };
 
     await this.driversService.editProfile(payload);
 
-    return 'user details edited successfully';
+    return 'driver details edited successfully';
   }
 
   @Get('profile-details')

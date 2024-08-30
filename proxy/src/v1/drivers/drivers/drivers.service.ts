@@ -6,7 +6,7 @@ import { ClientProxy } from '@nestjs/microservices';
 @Injectable()
 export class DriversService {
   constructor(@Inject('DRIVERS') private readonly driversClient: ClientProxy) {}
-  async editProfile(payload: any) {
+  async editProfile(payload: EditDriverProfile) {
     const observableData = this.driversClient
       .send('driver.editProfile', new EditProfileEvent(payload))
       .pipe(

@@ -50,6 +50,9 @@ export class Driver extends BaseModel {
   @Column({ default: 0 })
   noOfRating: number; // the no of users that have rated this driver
 
+  @Column({ nullable: true })
+  profileImage?: string;
+
   @Column({ default: 0 })
   numberOfRides: number;
 

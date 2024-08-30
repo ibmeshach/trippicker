@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 
 export class DriverEntity {
   @Exclude()
@@ -10,20 +10,8 @@ export class DriverEntity {
 }
 
 export class DriverProfileDetail {
-  @Expose()
-  fullName: string;
-
-  @Expose()
-  email: string;
-
-  @Expose()
-  phoneNumber: string;
-
-  @Expose()
-  address: string;
-
-  @Expose()
-  profileImage: string;
+  @Exclude()
+  otpToken: string;
 
   constructor(partial: Partial<DriverProfileDetail>) {
     Object.assign(this, partial);
