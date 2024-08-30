@@ -14,8 +14,8 @@ import { Express } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from './config/multer.config';
 
-@ApiTags('user')
-@Controller('v1/users/')
+@ApiTags('users')
+@Controller('v1/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

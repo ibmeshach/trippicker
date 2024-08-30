@@ -132,7 +132,7 @@ export class AuthService {
     user.isPhoneNumberConfirmed = true;
     user.save();
 
-    return { accessToken };
+    return { user, accessToken };
   }
 
   async resendOtpCode(body: ResendOtpCodeProps) {

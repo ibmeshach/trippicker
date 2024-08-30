@@ -21,14 +21,6 @@ export class EditUserProfileDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    example: '08061909748',
-    description: 'user phoneNumber',
-  })
-  phoneNumber: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty({
     example: '',
     description: 'user address',
   })

@@ -21,14 +21,6 @@ export class EditDriverProfileDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    example: '08061909748',
-    description: 'driver phoneNumber',
-  })
-  phoneNumber: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty({
     example: '',
     description: 'driver address',
   })

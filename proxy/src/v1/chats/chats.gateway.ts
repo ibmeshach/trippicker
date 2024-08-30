@@ -22,30 +22,38 @@ import {
   },
   transports: ['websocket'],
 })
-export class ChatGateway implements OnGatewayConnection {
+export class ChatGateway {
   @WebSocketServer() server: Server;
 
   constructor(
     @Inject('USERS') private readonly usersClient: ClientProxy,
-    @Inject('DRIVERS') private readonly driversClient: ClientProxy,
+    @Inject('DRIVERS') private readonly driversClient: ClientProxy
   ) {}
 
-  handleConnection(client: Socket) {
-    const token = client.handshake.headers['authorization'];
-
-    console.log(token);
-    const { role, rideId, driverId, userId } = client.handshake.query;
-
-    client.data = { role, rideId, userId, driverId };
-    client.join(rideId);
-  }
-
   @SubscribeMessage('message')
-  async handleMessage(client: Socket, payload: { message: string }) {
-    const { message } = payload;
-    const { driverId, userId, role, rideId } = client.data;
+  async handleMessage(
+    client: Socket,
+    payload: {
+      message: string;
+      rideId: string;
+      role: string;
+      driverId: string;
+      userId: string;
+    }
+  ) {
+    const { message, rideId, driverId, role, userId } = payload;
 
     console.log('get here first', payload);
+
+    console.log(
+      {
+        userId,
+        rideId,
+        role,
+        driverId,
+      },
+      'client-data'
+    );
 
     try {
       // Handling the driver chat
@@ -58,14 +66,14 @@ export class ChatGateway implements OnGatewayConnection {
               role,
               rideId,
               content: message,
-            }),
+            })
           )
           .pipe(
-            catchError((error) => {
+            catchError(error => {
               console.error('Error sending message to drivers service:', error);
               throw error;
-            }),
-          ),
+            })
+          )
       );
 
       console.log('Driver service response:', driverChat);
@@ -80,22 +88,22 @@ export class ChatGateway implements OnGatewayConnection {
               role,
               rideId,
               content: message,
-            }),
+            })
           )
           .pipe(
-            catchError((error) => {
+            catchError(error => {
               console.error('Error sending message to users service:', error);
               throw error;
-            }),
-          ),
+            })
+          )
       );
 
       console.log('User service response:', userChat);
 
       console.log('get here second and last');
 
-      this.server.to(rideId).emit(`message:${driverId}`, driverChat);
-      this.server.to(rideId).emit(`message:${userId}`, userChat);
+      this.server.emit(`message:${rideId}:${driverId}`, driverChat);
+      this.server.emit(`message:${rideId}:${userId}`, userChat);
     } catch (error) {
       console.error('Error processing chat message:', error);
       // Optionally, you can notify the client of the error

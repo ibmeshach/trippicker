@@ -52,6 +52,8 @@ export class RideController {
         this.queryRunner.manager,
       );
 
+      const userId = data.user.id;
+
       delete data.user.id;
       if (!user) {
         // Create a new user if it does not exist
@@ -81,7 +83,12 @@ export class RideController {
       await this.queryRunner.manager.save(user);
 
       await this.queryRunner.commitTransaction();
-      return ride;
+      return {
+        ...ride,
+        userId,
+        originAddress: data.originAddress,
+        destinationAddreses: data.destinationAddresses,
+      };
     } catch (err) {
       console.log('error', err);
       await this.queryRunner.rollbackTransaction();

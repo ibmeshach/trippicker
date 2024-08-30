@@ -14,7 +14,7 @@ import { ChatController } from './chat.controller';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          // host: 'users-nestjs-backend.railway.internal',
+          host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
@@ -22,7 +22,7 @@ import { ChatController } from './chat.controller';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

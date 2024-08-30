@@ -21,6 +21,7 @@ import { ChatsModule } from './v1/chats/chats.module';
 import { DriverRideModule } from './v1/drivers/ride/ride.module';
 import { UsersModule } from './v1/users/users/users.module';
 import { DriversModule } from './v1/drivers/drivers/drivers.module';
+import { RatingModule } from './v1/users/rating/rating.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { DriversModule } from './v1/drivers/drivers/drivers.module';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          // host: 'users-nestjs-backend.railway.internal',
+          host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
@@ -37,7 +38,7 @@ import { DriversModule } from './v1/drivers/drivers/drivers.module';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },
@@ -66,6 +67,7 @@ import { DriversModule } from './v1/drivers/drivers/drivers.module';
     ChatsModule,
     UsersModule,
     DriversModule,
+    RatingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

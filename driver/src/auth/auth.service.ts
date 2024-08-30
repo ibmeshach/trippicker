@@ -132,7 +132,7 @@ export class AuthService {
     driver.isPhoneNumberConfirmed = true;
     driver.save();
 
-    return { accessToken };
+    return { driver, accessToken };
   }
 
   async resendOtpCode(body: ResendOtpCodeProps) {

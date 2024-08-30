@@ -131,6 +131,7 @@ export class UserController {
       }
 
       const userId = data.userId;
+      delete data.phoneNumber;
       delete data.userId;
       delete data.file;
       await this.userService.update(userId, { ...data, profileImage });

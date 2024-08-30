@@ -12,7 +12,7 @@ import { EventsModule } from 'src/v1/events/events.module';
         name: 'USERS',
         transport: Transport.TCP,
         options: {
-          // host: 'users-nestjs-backend.railway.internal',
+          host: 'users-nestjs-backend.railway.internal',
           port: 3001,
         },
       },
@@ -20,7 +20,7 @@ import { EventsModule } from 'src/v1/events/events.module';
         name: 'DRIVERS',
         transport: Transport.TCP,
         options: {
-          // host: 'drivers-nestjs-backend.railway.internal',
+          host: 'drivers-nestjs-backend.railway.internal',
           port: 3002,
         },
       },

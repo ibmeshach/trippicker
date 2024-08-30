@@ -84,6 +84,8 @@ export class RideController {
       return {
         ...ride,
         driverId,
+        originAddress: data.originAddress,
+        destinationAddreses: data.destinationAddresses,
       };
     } catch (err) {
       console.log('error', err);

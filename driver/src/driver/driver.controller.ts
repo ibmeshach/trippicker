@@ -173,6 +173,7 @@ export class DriverController {
       }
 
       const userId = data.driverId;
+      delete data.phoneNumber;
       delete data.driverId;
       delete data.file;
       await this.driverService.update(userId, { ...data, profileImage });

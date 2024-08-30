@@ -8,13 +8,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { multerOptions } from './config/multer.config';
 import { EditDriverProfileDto } from './drivers.dto';
 import { DriversService } from './drivers.service';
 
-@Controller('drivers')
-@Controller('v1/drivers/')
+@ApiTags('drivers')
+@Controller('v1/drivers')
 export class DriversController {
   constructor(private readonly driversService: DriversService) {}
   @Put('edit-profile')
