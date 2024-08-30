@@ -44,7 +44,7 @@ export class Driver extends BaseModel {
   @Column({ default: false })
   isOnline: boolean;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   rating?: number;
 
   @Column({ default: 0 })

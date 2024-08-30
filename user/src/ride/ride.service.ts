@@ -75,7 +75,7 @@ export class RideService {
   async getRideDetails(rideId: string) {
     return await this.rideRepository.findOne({
       where: {
-        id: rideId,
+        rideId,
       },
       relations: ['driver'],
     });

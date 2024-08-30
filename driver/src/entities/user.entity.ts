@@ -29,7 +29,7 @@ export class User extends BaseModel {
   @Column({ nullable: true })
   address?: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   rating?: number;
 
   @Column({ default: 0 })

@@ -36,10 +36,10 @@ export class Ride extends BaseModel {
   @Column({ nullable: true })
   feedback: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   driverRating: number;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   userRating: number;
 
   @OneToOne(() => ChatMessage, (chatMessage) => chatMessage.ride)
