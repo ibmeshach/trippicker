@@ -17,12 +17,16 @@ import {
   DriverProfileDetail,
 } from './serializers/driver.serializer';
 import { plainToClass } from 'class-transformer';
+import { UserService } from 'src/user/user.service';
+import { RideService } from 'src/ride/ride.service';
 
 @Controller('driver')
 export class DriverController {
   constructor(
     private readonly driverService: DriverService,
     private readonly configService: ConfigService,
+    private readonly usersService: UserService,
+    private readonly rideService: RideService,
     @Inject('USERS') private readonly usersClient: ClientProxy,
   ) {}
 
@@ -131,7 +135,8 @@ export class DriverController {
 
   @MessagePattern('driver.rateDriver')
   async getAllChatMessages(
-    @Payload() { data }: { data: { rating: number; driverId: string } },
+    @Payload()
+    { data }: { data: { rating: number; driverId: string; rideId: string } },
   ) {
     try {
       const driver = await this.driverService.findDriverById(data.driverId);
@@ -142,12 +147,57 @@ export class DriverController {
           HttpStatus.NOT_FOUND,
         );
 
+      const ride = await this.rideService.findRideByRideId(data.rideId);
+
+      ride.userRating = data.rating;
+      ride.save();
       const oldRating = driver.rating;
 
       const averageRating = (oldRating + data.rating) / (driver.noOfRating + 1);
       driver.rating = averageRating;
       driver.noOfRating += 1;
       await driver.save();
+
+      return { status: true };
+    } catch (err) {
+      console.log(err);
+      if (err instanceof CustomException) {
+        throw err;
+      } else {
+        throw new HttpException(
+          'Internal Server Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  @MessagePattern('user.rateUser')
+  async rateUser(
+    @Payload()
+    { data }: { data: { rating: number; phoneNumber: string; rideId: string } },
+  ) {
+    try {
+      const user = await this.usersService.findUserByPhoneNumber(
+        data.phoneNumber,
+      );
+
+      if (!user)
+        throw new CustomException(
+          'Enter a valid user phoneNumber',
+          HttpStatus.NOT_FOUND,
+        );
+
+      const ride = await this.rideService.findRideByRideId(data.rideId);
+
+      ride.userRating = data.rating;
+      ride.save();
+      const oldRating = user.rating;
+
+      const averageRating = (oldRating + data.rating) / (user.noOfRating + 1);
+      user.rating = averageRating;
+      user.noOfRating += 1;
+      await user.save();
 
       return { status: true };
     } catch (err) {
