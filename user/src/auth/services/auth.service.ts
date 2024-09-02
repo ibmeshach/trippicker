@@ -124,7 +124,7 @@ export class AuthService {
 
     const jwt_secret = this.configService.get<string>('JWT_ACCESS_TOKEN');
     const accessToken = await this.generateToken(
-      { sub: user.id },
+      { sub: user.id, email: user.email, fullName: user.fullName },
       jwt_secret,
       null,
     );
@@ -215,7 +215,12 @@ export class AuthService {
   }
 
   async generateToken(
-    payload: { sub: string; otpCode?: string },
+    payload: {
+      sub: string;
+      otpCode?: string;
+      email?: string;
+      fullName?: string;
+    },
     secret: string,
     expire_time: string | null,
   ) {
